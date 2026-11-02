@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>包裝模組。餅乾禮盒模擬器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+@property --h{syntax:"<number>";inherits:true;initial-value:140}
+:root{--h:140;--bg:hsl(var(--h) 22% 98.5%);--ink:#0f0e0e;--mute:#555;--soft:rgba(15,14,14,.16);--card:#fff;--g:#4ea46a;--gbg:hsl(140 38% 90%);--accbg:hsl(140 38% 90%);
+ --sn:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;--sf:var(--sn);--pad:clamp(20px,5.6vw,108px);
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);transition:--h 1.4s ease;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:hsl(var(--h) 14% 8%);--ink:#f4f1ea;--mute:#aaa;--soft:rgba(255,255,255,.22);--card:#151515;--g:#6cc487;--gbg:hsl(140 22% 18%);--accbg:hsl(140 22% 20%);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:hsl(var(--h) 14% 8%);--ink:#f4f1ea;--mute:#aaa;--soft:rgba(255,255,255,.22);--card:#151515;--g:#6cc487;--gbg:hsl(140 22% 18%);--accbg:hsl(140 22% 20%);color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:56px}
+body{margin:0;font:400 16px/1.8 var(--sn);letter-spacing:.05em;color:var(--ink);background:var(--bg) radial-gradient(rgba(128,128,128,.07) 1px,transparent 1.2px) 0 0/5px 5px;overflow-x:hidden;min-height:100vh;transition:background-color 1.4s}
+h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.04em}
+p{margin:0}
+.wrap{max-width:1704px;margin:0 auto;padding:0 var(--pad)}
+#bar{position:fixed;top:0;left:0;height:4px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--g);z-index:50}
+nav{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);padding-top:env(safe-area-inset-top,0px)}
+nav .wrap{display:flex;align-items:center;height:56px;gap:0;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
+nav b{margin-right:auto;font-weight:900;letter-spacing:0}
+nav a,nav button{color:var(--ink);text-decoration:none;font:400 14px var(--sn);padding:6px 0;border:0;background:none;cursor:pointer;letter-spacing:.05em}
+nav a+a::before,nav a+button::before{content:"|";margin:0 12px;color:var(--mute)}
+nav a:hover,nav button:hover{color:var(--g)}
+.blob{position:fixed;z-index:-1;pointer-events:none;background:var(--g);opacity:.14;transition:transform .2s}
+.hero{min-height:calc(100vh - 56px);display:grid;grid-template-columns:1fr;gap:40px;align-items:center;position:relative;padding:40px 0 60px}
+.hero h1{font-size:clamp(5rem,17vw,16rem);line-height:.95}
+.hero h2{font-size:clamp(1.3rem,3.4vw,3.4rem);margin:28px 0 14px;letter-spacing:-.02em}
+.hero p{text-align:justify;max-width:36em;color:var(--mute)}
+.btn{display:inline-block;margin-top:24px;padding:14px 30px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:700;transition:transform .3s,background .3s}
+.btn:hover{transform:translateY(-4px);background:var(--g)}
+.pic{position:relative;aspect-ratio:3/4;background:var(--gbg);overflow:hidden;max-height:78vh;justify-self:end;width:100%}
+.pic::before{content:"";position:absolute;left:-10%;top:18%;width:120%;height:26%;background:var(--g);opacity:.34;transform:rotate(-8deg)}
+.fl{position:absolute;font-size:clamp(3rem,8vw,6.4rem);animation:fl 6s ease-in-out infinite;filter:drop-shadow(0 18px 14px rgba(0,0,0,.2));user-select:none;letter-spacing:0}
+@keyframes fl{50%{transform:translateY(-22px) rotate(7deg)}}
+section{padding:96px 0}
+section h2.big{font-size:clamp(3.4rem,13vw,10rem);line-height:.95;margin-bottom:22px}
+section h2.big::before{content:"";display:block;width:clamp(60px,9vw,130px);height:clamp(16px,2.4vw,34px);background:var(--g);border-radius:3px 14px 4px 12px;transform:rotate(-4deg);margin-bottom:18px;transition:width .8s .2s}
+.lead{color:var(--mute);margin:0 0 40px;max-width:40em;text-align:justify}
+.cols{display:grid;gap:44px 40px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.col{border-top:3px solid var(--ink);padding-top:16px;transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s}
+.col:hover{transform:translateY(-8px);border-color:var(--g)}
+.col h3{font-size:1.45rem;margin-bottom:10px}.col p{text-align:justify;font-size:.95rem;color:var(--mute)}
+.col small{display:block;color:var(--g);font-weight:700;margin-bottom:6px}
+.col .tk{margin-top:10px;color:var(--ink)}.col .tk b{background:linear-gradient(transparent 60%,var(--gbg) 60%)}
+.col a{display:inline-block;margin-top:10px;font-size:.82rem;color:var(--ink)}
+.col .chip{margin-top:12px;display:block}
+.rv{opacity:1}.js .rv{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s cubic-bezier(.2,.8,.2,1)}.js .rv.in{opacity:1;transform:none}
+.lab{display:grid;gap:36px;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}
+.stage{position:sticky;top:64px;background:var(--card);border:1px solid var(--soft);border-top:3px solid var(--ink);padding:14px}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-bottom:8px}
+.tabs button{flex:none;border:0;background:none;color:var(--mute);font:500 13px var(--sn);letter-spacing:.05em;padding:7px 12px;cursor:pointer;transition:all .25s}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+#cv{width:100%;height:auto;display:block;max-height:60vh}
+#cv.pop>g{animation:pop .5s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{opacity:.2;transform:scale(.94)}}
+.spec{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:6px}
+.spec td{padding:5px 6px;border-top:1px solid var(--soft)}.spec td:first-child{color:var(--mute);white-space:nowrap}
+.ctl{display:grid;gap:22px}
+.grp{border-top:3px solid var(--ink);padding-top:12px}
+.grp h3{font-size:1.05rem;margin-bottom:10px;letter-spacing:0}.grp h3 small{font:400 .78rem var(--sn);color:var(--mute);margin-left:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--ink);background:transparent;color:var(--ink);padding:8px 14px;font:500 .88rem var(--sn);letter-spacing:.04em;cursor:pointer;transition:transform .25s,background .25s,color .25s}
+.chip:hover{transform:translateY(-3px);border-color:var(--g);color:var(--g)}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);box-shadow:4px 4px 0 var(--g)}
+.chip .sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:1px solid rgba(128,128,128,.6)}
+.th{width:100%;height:auto;display:block;margin-bottom:14px;background:var(--gbg)}.col a+a{margin-left:14px}
+[hidden]{display:none!important}
+.bar3{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:8px;font-size:.85rem;letter-spacing:.02em}.bar3 label{display:flex;gap:8px;align-items:center}.bar3 input{flex:1;min-width:0;accent-color:var(--g)}.bar3 span{grid-column:1/-1;display:flex;gap:8px}
+.hint{font-size:.78rem;color:var(--mute);margin:8px 0 6px;letter-spacing:.02em}.pis{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.pi{border:1px solid var(--ink);background:var(--card);padding:3px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}.pi svg{width:100%;height:32px;display:block}.pi small{display:block;font-size:.64rem;text-align:center;letter-spacing:0;line-height:1.4}
+.pbtn{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.pbtn .chip{padding:5px 10px;font-size:.8rem}
+.ghost{position:fixed;z-index:99;pointer-events:none;transform:translate(-50%,-50%);opacity:.9}#cv.free{touch-action:none}
+.tin{display:grid;gap:8px;grid-template-columns:1fr 1fr 64px}.tin label{display:flex;flex-direction:column;font-size:.78rem;color:var(--mute);letter-spacing:.02em;min-width:0}.tin input{font:inherit;padding:6px 8px;border:1px solid var(--ink);background:var(--card);color:var(--ink);min-width:0;width:100%}
+.srch{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--ink);background:var(--card);color:var(--ink);margin:6px 0 8px;min-width:0}
+.mlist{max-height:300px;overflow:auto;border-top:1px solid var(--soft)}
+.it{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--soft);padding:8px 4px;color:var(--ink);font:inherit;font-size:.86rem;cursor:pointer;letter-spacing:.02em;transition:background .2s}.it:hover{background:var(--gbg)}.it code{font-size:.7rem;color:var(--mute);white-space:nowrap;align-self:center}.it span{min-width:0}
+.msum{list-style:none;margin:0;padding:0;font-size:.84rem}.msum li{display:flex;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--soft);cursor:pointer}.msum li.sel{background:var(--gbg)}.msum i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:.72rem;flex:none}.msum span{flex:1;min-width:0}.msum code{font-size:.68rem;color:var(--mute)}.msum .rm{border:0;background:none;color:var(--mute);font-size:1.1rem;cursor:pointer}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 18px;font-size:.86rem;opacity:0;pointer-events:none;transition:.3s;z-index:90}#toast.show{opacity:1;transform:translate(-50%,0)}
+.flt{display:flex;gap:8px;margin-bottom:36px;flex-wrap:wrap}
+button:focus-visible,a:focus-visible{outline:3px solid var(--g);outline-offset:2px}
+.tw{overflow-x:auto;border-top:3px solid var(--ink)}
+table.t{width:100%;border-collapse:collapse;font-size:.92rem}
+.t th,.t td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--soft);white-space:nowrap}.t th{color:var(--mute);font-weight:500}
+.t tr{transition:background .25s}.t tbody tr:hover{background:var(--gbg)}
+footer{padding:40px 0 70px;color:var(--mute);font-size:.86rem}
+@media (max-width:860px){.hero{grid-template-columns:1fr;min-height:0}.pic{aspect-ratio:4/3;max-height:42vh}.lab{grid-template-columns:1fr}.stage{top:56px;z-index:5}#cv{max-height:38vh}.spec{display:none}section{padding:64px 0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="blob" id="b1" style="width:300px;height:80px;top:14%;left:-60px;transform:rotate(-8deg)"></div>
+<div class="blob" id="b2" style="width:360px;height:90px;top:62%;right:-80px;transform:rotate(7deg)"></div>
+<nav><div class="wrap"><b>包裝模組。</b><a href="#trend">市場趨勢</a><a href="#jk">日韓觀察</a><a href="#lab">模擬器</a><a href="#size">尺寸表</a><button id="th" aria-label="切換深淺色">◐</button></div></nav>
+
+<header class="hero" data-h="140"><div class="wrap" style="grid-column:1/-1;display:contents"></div>
+ <div style="padding-left:var(--pad)"><h1>包裝<br>模組。</h1>
+  <h2>餅乾禮盒模擬器</h2>
+  <p>從內襯格局、外盒裝飾到提袋，每個選擇都會即時更新預覽、尺寸與平面圖，幫你在打樣前先看到可能性。</p>
+  <a class="btn" href="#lab">開始組合</a></div>
+ </header>
+
+<section id="trend" data-h="95"><div class="wrap">
+ <h2 class="big rv">市場趨勢</h2>
+ <p class="lead rv">整理自業界常見做法，作為模組的設計依據；實際規格請與印刷與紙器廠確認。</p>
+ <div class="cols">
+  <div class="col rv"><h3>低飽和色＋單一燙金</h3><p>奶油、抹茶、莓果等柔和底色，只用一處燙金或壓紋強調品牌，質感高又好控成本。</p></div>
+  <div class="col rv"><h3>開窗與可視化</h3><p>蓋面開窗或透明片，讓顧客直接看到餅乾，同時減少多餘裝飾。</p></div>
+  <div class="col rv"><h3>分格內襯</h3><p>紙托、蜂巢緩衝、玻璃紙分隔，依單品形狀切格，運送不碎也方便拍照。</p></div>
+  <div class="col rv"><h3>減塑與可重複使用</h3><p>FSC 認證紙、免膠帶卡榫、可當收納盒的鐵盒與書本盒，是送禮市場的加分項。</p></div>
+  <div class="col rv"><h3>開箱儀式感</h3><p>天地蓋、抽屜盒、書本磁吸盒，搭配緞帶、封蠟章、乾燥花，強調拆開的過程。</p></div>
+  <div class="col rv"><h3>提袋是第二個包裝</h3><p>繩提、緞帶提把、吊牌與貼紙，讓提袋本身就能被拍照分享與重複使用。</p></div>
+ </div></div></section>
+
+<section id="jk" data-h="170"><div class="wrap">
+ <h2 class="big rv">日韓觀察</h2>
+ <p class="lead rv">持續收集日本與韓國的糕點包裝案例，目前共 <b id="cnt">0</b> 筆。縮圖是依各案例風格重繪的向量示意，不是原始照片；想看實物請點「看實際設計圖片」。按「套用到模擬器」會把盒型、內襯、配色、外盒裝飾與盒面圖樣一起帶入。</p>
+ <div class="flt rv" id="flt"></div>
+ <div class="cols" id="jkgrid"></div></div></section>
+
+<section id="lab" data-h="40"><div class="wrap">
+ <h2 class="big rv">模組模擬</h2>
+ <p class="lead rv">點選右側模組，左側會立即更新。內襯格局會依外盒形狀提供不同選項，盒型結構參考<a href="https://www.allbox99.com/Site/News/NewsCategory?ID=2" target="_blank" rel="noopener">包妝盒「盒型介紹」</a>中的抽屜盒、天地盒、派盒與海苔造型盒等分類；造型水果禮盒參考<a href="https://www.allbox99.com/site/shop/product?Id=1022" target="_blank" rel="noopener">《食品業愛用包裝盒》造型水果禮盒</a>（展示盒結構，500 個起訂）。橢圓盒的天地蓋、蓋面圖紋與標籤、雙側蓋板與蓋內小卡，參考<a href="https://libraryangte.com/collections/intro-with-heart" target="_blank" rel="noopener">紅茶圖圕館〈Intro with Heart〉</a>。「口味設定」與「挑選內容物」使用示意菜單，名稱都是「口味＋食物本體」（例如巧克力餅乾、番茄義大利麵），每個內襯格可對應一道餐點。</p>
+ <div class="lab">
+  <div class="stage rv"><div class="tabs" id="tabs"></div>
+   <svg id="cv" viewBox="0 0 400 300" role="img" aria-label="包裝預覽"></svg>
+   <div id="c3d" class="bar3" hidden><label>旋轉<input type="range" id="yaw" min="0" max="360" value="35" aria-label="水平旋轉"></label><label>俯仰<input type="range" id="tilt" min="12" max="88" value="48" aria-label="俯仰角度"></label><span><button class="chip" id="opn" type="button" aria-pressed="false">開蓋看內襯</button><button class="chip" id="aut" type="button" aria-pressed="false">自動旋轉</button></span></div>
+   <div id="pal" hidden><p class="hint">拖曳（或點一下）加入；點選後可旋轉；拖出盒外即刪除</p><div class="pis" id="pis"></div><div class="pbtn"><button class="chip" id="prot" type="button">旋轉選取</button><button class="chip" id="pdel" type="button">刪除選取</button><button class="chip" id="pclr" type="button">清空</button><button class="chip" id="pfill" type="button">以範本重填</button></div></div>
+   <table class="spec" id="spec"></table></div>
+  <div class="ctl" id="ctl"></div>
+ </div></div></section>
+
+<section id="size" data-h="200"><div class="wrap">
+ <h2 class="big rv">尺寸表</h2>
+ <p class="lead rv">單位為公分，內襯留 0.3 至 0.5 cm 公差；天地蓋的蓋子比盒身各邊再放大約 0.3 cm。</p>
+ <div class="tw rv"><table class="t"><thead><tr><th>款式</th><th>盒身 長×寬×高</th><th>建議容量</th><th>提袋 寬×厚×高</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div></section>
+<footer><div class="wrap">尺寸為通用建議值，正式量產前請以紙器廠提供的刀模圖為準。<p style="margin-top:18px;padding-top:14px;border-top:1px solid var(--soft);font-size:.76rem;line-height:1.9;letter-spacing:.04em">溫馨備註：本頁菜單為示意資料，並非實際商品或內部資料；網頁設計之所有權歸陳可人所有。感謝您的欣賞，若有引用或轉載的需要，歡迎先與我們聯繫，謝謝您的體諒與支持。</p></div></footer>
+
+<script type="application/json" id="pd">{"c":["巧克力","茶香","果香","堅果","奶香","鹹香","蔬菜香草","辛香"],"t":["甜點","餅乾","義大利麵","炒飯","炒麵","主菜","沙拉","湯品","前菜","點心","麵包","水果"],"r":[["M001","巧克力布朗尼",1,0],["M002","抹茶蛋糕捲",2,0],["M003","檸檬塔",3,0],["M004","草莓千層",3,0],["M005","焦糖布丁",5,0],["M006","伯爵茶戚風",2,0],["M007","芒果慕斯",3,0],["M008","藍莓馬芬",3,0],["M009","榛果可麗露",4,0],["M010","起司蛋糕",5,0],["M011","鳳梨酥",3,0],["M012","優格慕斯",5,0],["M013","可可泡芙",1,0],["M014","芝麻奶酪",4,0],["M015","黑巧克力塔",1,0],["M016","蜂蜜蛋糕",5,0],["M017","巧克力餅乾",1,1],["M018","抹茶餅乾",2,1],["M019","奶油餅乾",5,1],["M020","杏仁餅乾",4,1],["M021","焦糖餅乾",5,1],["M022","海鹽餅乾",6,1],["M023","檸檬餅乾",3,1],["M024","伯爵茶餅乾",2,1],["M025","花生餅乾",4,1],["M026","芝麻餅乾",4,1],["M027","起司餅乾",5,1],["M028","核桃餅乾",4,1],["M029","榛果餅乾",4,1],["M030","可可餅乾",1,1],["M031","黑胡椒餅乾",8,1],["M032","蔓越莓餅乾",3,1],["M033","肉桂餅乾",8,1],["M034","烏龍茶餅乾",2,1],["M035","薑汁餅乾",8,1],["M036","蜂蜜餅乾",5,1],["M037","番茄義大利麵",7,2],["M038","青醬義大利麵",7,2],["M039","蒜香義大利麵",6,2],["M040","奶油義大利麵",5,2],["M041","起司義大利麵",5,2],["M042","黑胡椒義大利麵",8,2],["M043","檸檬義大利麵",3,2],["M044","蘑菇義大利麵",7,2],["M045","南瓜義大利麵",7,2],["M046","麻辣義大利麵",8,2],["M047","蒜香炒飯",6,3],["M048","咖哩炒飯",8,3],["M049","番茄炒飯",7,3],["M050","黑胡椒炒飯",8,3],["M051","麻辣炒飯",8,3],["M052","奶油炒飯",5,3],["M053","泡菜炒飯",8,3],["M054","玉米炒飯",7,3],["M055","沙茶炒飯",8,3],["M056","麻辣炒麵",8,4],["M057","蒜香炒麵",6,4],["M058","黑胡椒炒麵",8,4],["M059","咖哩炒麵",8,4],["M060","沙茶炒麵",8,4],["M061","芝麻炒麵",4,4],["M062","泡菜炒麵",8,4],["M063","照燒炒麵",6,4],["M064","迷迭香雞排",7,5],["M065","黑胡椒牛排",8,5],["M066","檸檬魚排",3,5],["M067","蒜香雞腿",6,5],["M068","咖哩雞肉",8,5],["M069","味噌鮭魚",6,5],["M070","照燒雞腿",6,5],["M071","薑汁豬排",8,5],["M072","奶油干貝",5,5],["M073","番茄燉牛肉",7,5],["M074","起司焗烤雞",5,5],["M075","芒果沙拉",3,6],["M076","柑橘沙拉",3,6],["M077","芝麻沙拉",4,6],["M078","檸檬沙拉",3,6],["M079","青醬沙拉",7,6],["M080","優格沙拉",5,6],["M081","核桃沙拉",4,6],["M082","蘋果沙拉",3,6],["M083","蜂蜜芥末沙拉",5,6],["M084","番茄湯",7,7],["M085","玉米濃湯",7,7],["M086","南瓜濃湯",7,7],["M087","蘑菇濃湯",7,7],["M088","咖哩湯",8,7],["M089","味噌湯",6,7],["M090","薑汁湯",8,7],["M091","奶油濃湯",5,7],["M092","迷迭香烤馬鈴薯",7,8],["M093","青醬烤蔬菜",7,8],["M094","檸檬燻鮭魚",3,8],["M095","海鹽毛豆",6,8],["M096","黑胡椒烤雞",8,8],["M097","起司球",5,8],["M098","蒜香蝦",6,8],["M099","柑橘鴨胸",3,8],["M100","麻辣小黃瓜",8,8],["M101","海鹽爆米花",6,9],["M102","焦糖爆米花",5,9],["M103","起司薯條",5,9],["M104","芝麻地瓜",4,9],["M105","花生糖",4,9],["M106","抹茶麻糬",2,9],["M107","芒果布丁",3,9],["M108","巧克力脆片",1,9],["M109","肉桂捲心酥",8,9],["M110","奶油麵包",5,10],["M111","抹茶麵包",2,10],["M112","起司麵包",5,10],["M113","蒜香麵包",6,10],["M114","巧克力吐司",1,10],["M115","肉桂捲",8,10],["M116","核桃吐司",4,10],["M117","蜂蜜吐司",5,10],["M118","海鹽卷",6,10],["M119","蔓越莓吐司",3,10],["M120","蜂蜜鳳梨",5,11],["M121","柑橘蜜餞",3,11],["M122","優格草莓",5,11],["M123","巧克力草莓",1,11],["M124","焦糖蘋果",5,11],["M125","肉桂蘋果",8,11],["M126","蔓越莓蜜餞",3,11],["M127","芒果乾",3,11],["M128","檸檬蜜",3,11]]}</script>
+<script>
+document.documentElement.classList.add("js");
+const $=s=>document.querySelector(s);
+const SZ={S:{n:"迷你 4–6 入",L:16,W:12,H:4.5},M:{n:"標準 9 入",L:20,W:20,H:5},XL:{n:"大型 12 入",L:28,W:20,H:5.5},B:{n:"長條 8 入",L:30,W:10,H:4.5}};
+const grid=(c,r)=>{const a=[];for(let j=0;j<r;j++)for(let i=0;i<c;i++)a.push([i/c,j/r,1/c,1/r]);return a};
+const ring=(n,R,cw,ch,t)=>{const a=[];for(let i=0;i<n;i++){const g=-Math.PI/2+i*2*Math.PI/n;a.push([.5+R*.5*Math.cos(g)-cw/2,.5+R*.5*Math.sin(g)-ch/2,cw,ch,1,t])}return a};
+const E=(x,y,w,h,t)=>[x,y,w,h,1,t];
+const gridIn=(c,r,m)=>{const a=[];for(let j=0;j<r;j++)for(let i=0;i<c;i++)a.push([m+(1-2*m)*i/c,m+(1-2*m)*j/r,(1-2*m)/c,(1-2*m)/r,1]);return a};
+const LY={g6:{n:"六格 3×2",c:grid(3,2)},g9:{n:"九格 3×3",c:grid(3,3)},hero:{n:"主角＋四小",c:[[0,0,.5,1],...[0,1].flatMap(j=>[0,1].map(i=>[.5+i*.25,j*.5,.25,.5]))]},row:{n:"四直列",c:grid(4,1)},free:{n:"自由擺放（拖曳）",c:[]},
+cross5:{n:"十字梅花 5 格",c:[[0,0,.34,.34],[.66,0,.34,.34],[0,.66,.34,.34],[.66,.66,.34,.34],[.34,.34,.32,.32]]},
+wide2:{n:"雙欄大格 4 格",c:grid(2,2)},
+rows3:{n:"三排橫列（長條）",c:[[0,0,1,1/3,0,"long"],[0,1/3,1,1/3,0,"long"],[0,2/3,1,1/3,0,"long"]]},
+ring6c:{n:"環形 6＋中心",c:[...ring(6,.64,.26,.26),E(.37,.37,.26,.26)]},
+ring8:{n:"環形 8 格",c:ring(8,.7,.22,.22)},
+pie4:{n:"四等分派形",c:[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]]},
+center1:{n:"整片單入（大餅／蛋糕）",c:[E(.08,.08,.84,.84,"cookie")]},
+tri3:{n:"三葉 3 格",c:ring(3,.52,.4,.4)},
+libP:{n:"疊放酥片＋雙側蓋板",k:12,c:Array.from({length:12},(_,i)=>[.31,.12+i*.0633,.38,.055,0,"pouch"]),d:libDraw("P")},
+libC:{n:"酥片＋兩側糖果艙",k:"12 片＋10 糖",c:Array.from({length:12},(_,i)=>[.31,.12+i*.0633,.38,.055,0,"pouch"]),d:libDraw("C")},
+libL:{n:"磅蛋糕單入＋蓋板",k:1,c:[[.33,.14,.34,.72,0,"loaf"]],d:libDraw("L")},
+ovl2:{n:"雙大格",c:[E(.04,.12,.44,.76),E(.52,.12,.44,.76)]},
+ovl3:{n:"三連橢格",c:[E(.04,.2,.29,.6),E(.355,.2,.29,.6),E(.67,.2,.29,.6)]},
+ovlH:{n:"主角＋雙側",c:[E(.3,.14,.4,.72),E(.05,.27,.23,.46),E(.72,.27,.23,.46)]},
+ovlR:{n:"橢環 6＋中心",c:[...ring(6,.66,.22,.3),E(.4,.35,.2,.3)]},
+ovlG:{n:"2×3 內縮",c:gridIn(3,2,.1)},
+frC:{n:"單入主角",c:[E(.16,.2,.68,.68,"cookie")]},
+frD:{n:"上下雙格",c:[E(.18,.16,.64,.34),E(.18,.54,.64,.36)]},
+frT:{n:"三顆並列",c:[E(.1,.22,.38,.38),E(.52,.22,.38,.38),E(.31,.58,.38,.36)]},
+frQ:{n:"四格 2×2",c:[E(.1,.2,.38,.36),E(.52,.2,.38,.36),E(.14,.58,.34,.34),E(.52,.58,.34,.34)]}};
+const LYS={rect:["g6","g9","hero","row","cross5","wide2","rows3"],round:["ring6c","ring8","pie4","center1","tri3"],oval:["libP","libC","libL","ovl2","ovl3","ovlH","ovlR","ovlG"],fruit:["frC","frD","frT","frQ"]};
+const SHS={rect:"天地盒／抽屜盒／書型盒結構",round:"圓形天地盒或派盒結構，分隔紙托",oval:"橢圓天地蓋（蓋與盒身分離，蓋內可做巧思）",fruit:"展示盒式造型盒，灰銅紙彩印＋霧膜"};
+function fixLy(){const l=LYS[S.shape];if(S.ly!=="free"&&!l.includes(S.ly))S.ly=l[0]}
+function lyOpts(){return Object.fromEntries(LYS[S.shape].concat(["free"]).map(k=>[k,LY[k].n]))}
+const IT={cookie:"圓餅乾",square:"方酥／鳳梨酥",long:"蛋捲／貓舌餅",mac:"馬卡龍"};
+const PL={cream:{n:"奶油白",bx:"#e9d7bb",lid:"#f7ecd9",ac:"#b8913f",tr:"#eadbc3"},cara:{n:"焦糖",bx:"#9c5a2a",lid:"#bf7a3e",ac:"#f4dca8",tr:"#8a4d22"},berry:{n:"莓果",bx:"#9c3b55",lid:"#bd566f",ac:"#f6d9b0",tr:"#862f48"},matcha:{n:"抹茶",bx:"#6f8a5e",lid:"#8fab7c",ac:"#f4eccb",tr:"#627b53"},angteG:{n:"墨綠粉",bx:"#2b3a34",lid:"#3c4f48",ac:"#efb4bd",tr:"#28352f",pn:"#f1d3cf"},angteB:{n:"鐵藍粉",bx:"#26384f",lid:"#34506f",ac:"#efb4bd",tr:"#22314a",pn:"#f1d3cf"},kraft:{n:"牛皮米",bx:"#cfae74",lid:"#e8d3a6",ac:"#6b4326",tr:"#dcc48f"},navy:{n:"夜藍",bx:"#27344f",lid:"#37486b",ac:"#e6c36b",tr:"#1f2a42"}};
+const DC={ribbon:"緞帶蝴蝶結",label:"燙金標籤",wax:"封蠟章",twine:"麻繩＋乾燥花",window:"蓋面開窗",bowtag:"麻繩蝴蝶結＋吊卡"};
+const BG={hand:"平提把紙袋",rope:"繩提紙袋",ribbon:"緞帶提把",boxbag:"提盒型"};
+const BD={sticker:"圓形貼紙",tag:"吊牌",foil:"燙金底邊",bow:"蝴蝶結",dots:"壓紋點點"};
+const S={pt:"ovalchain",size:"M",ly:"libP",it:"cookie",col:"angteG",dc:new Set([]),bag:"rope",bd:new Set(["tag","foil"]),view:"d3",yaw:35,tilt:48,open:false,auto:false,shape:"oval",lb:"diamond",t1:"MY BAKERY",t2:"Gift Collection",t3:"M",li:new Set(["msg","list"]),pcs:[],sel:-1,last:"libP",cleared:false};
+const VW={d3:"3D 立體",out:"外觀",pair:"開蓋全貌",in:"內部擺設",lid:"蓋內巧思",net:"盒型平面圖",bag:"提袋",bnet:"提袋平面圖"};
+const P=()=>PL[S.col],f=n=>Math.round(n*10)/10;
+
+function item(t,x,y,w,h,p){const cx=x+w/2,cy=y+h/2,r=Math.min(w,h)/2*.82;
+ if(t==="cookie")return`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#d9a066"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#b97d42" stroke-width="1.5"/>`+[[-.4,-.3],[.3,-.4],[.1,.2],[-.3,.4],[.45,.25]].map(d=>`<circle cx="${cx+d[0]*r}" cy="${cy+d[1]*r}" r="${r*.13}" fill="#4a2c1a"/>`).join("");
+ if(t==="square"){const a=Math.min(w,h)*.74;return`<rect x="${cx-a/2}" y="${cy-a/2}" width="${a}" height="${a}" rx="${a*.18}" fill="#e6b24c"/><path d="M${cx-a/2+4} ${cy}h${a-8}M${cx} ${cy-a/2+4}v${a-8}" stroke="#c28a2a" stroke-width="1.5"/>`}
+ if(t==="pouch"){const pw=w*.9,ph=Math.max(5,h*.38);return pouch(cx-pw/2,cy-ph/2,pw,ph,["#9db08c","#dcb98b","#b5402f","#cfccc6"][Math.round(x*3+y*5)%4])}
+ if(t==="candy")return candy(cx,cy,Math.min(w,h)*.32,["#e9a0b0","#a9cdb0","#f0c9a0"][Math.round(x+y)%3]);
+ if(t==="loaf"){const lw=w*.86,lh=h*.86;return`<rect x="${cx-lw/2-2}" y="${cy-lh/2-2}" width="${lw+4}" height="${lh+4}" rx="6" fill="rgba(255,255,255,.2)" stroke="#fff" stroke-opacity=".6"/><rect x="${cx-lw/2}" y="${cy-lh/2}" width="${lw}" height="${lh}" rx="${lw*.2}" fill="#c98a4a"/>`+[.25,.5,.75].map(k=>`<path d="M${cx-lw*.3} ${cy-lh/2+lh*k}q${lw*.3} -6 ${lw*.6} 0" stroke="#a96d33" fill="none" stroke-width="1.5"/>`).join("")}
+ if(t==="heart"){const k=r*.95;return`<path d="M${cx} ${cy+k*.85}C${cx-k*1.5} ${cy-k*.1} ${cx-k*.8} ${cy-k*1.1} ${cx} ${cy-k*.35}C${cx+k*.8} ${cy-k*1.1} ${cx+k*1.5} ${cy-k*.1} ${cx} ${cy+k*.85}Z" fill="#e8a07a" stroke="#c7794f" stroke-width="1.5"/>`}
+ if(t==="long"){const lw=w*.82,lh=Math.max(6,Math.min(h*.5,lw*.38));return`<rect x="${cx-lw/2}" y="${cy-lh/2}" width="${lw}" height="${lh}" rx="${lh/2}" fill="#e0b070"/>`+[.25,.45,.65,.85].map(k=>`<path d="M${cx-lw/2+lw*k*.9} ${cy-lh/2+1}l-3 ${lh-2}" stroke="#b98a4a" stroke-width="1.5"/>`).join("")}
+ const sh=["#e97f9a","#f0b04a","#8fbf7a","#b08ad6"][Math.round(x+y)%4];
+ return`<ellipse cx="${cx}" cy="${cy-r*.2}" rx="${r}" ry="${r*.46}" fill="${sh}"/><rect x="${cx-r*.96}" y="${cy-r*.06}" width="${r*1.92}" height="${r*.16}" rx="${r*.08}" fill="#fff6e8"/><ellipse cx="${cx}" cy="${cy+r*.2}" rx="${r}" ry="${r*.46}" fill="${sh}"/>`}
+function cells0(x,y,w,h,pad){const p=P();const dd=LY[S.ly].d;if(dd)return SH(x,y,w,h,`fill="${p.tr}"`,6)+dd(x,y,w,h,p);return`${SH(x,y,w,h,`fill="${p.tr}"`,6)}`+LY[S.ly].c.map((c,i)=>{const a=x+c[0]*w+pad,b=y+c[1]*h+pad,cw=c[2]*w-pad*2,ch=c[3]*h-pad*2;return`${c[4]?`<ellipse cx="${a+cw/2}" cy="${b+ch/2}" rx="${cw/2}" ry="${ch/2}" fill="rgba(255,255,255,.28)" stroke="rgba(0,0,0,.14)"/>`:`<rect x="${a}" y="${b}" width="${cw}" height="${ch}" rx="5" fill="rgba(255,255,255,.28)" stroke="rgba(0,0,0,.14)"/>`}`+item(c[5]||S.it,a,b,cw,ch,p)+slotDeco(i,a,b,cw,ch,c[4])}).join("")}
+const dim=(x1,y1,x2,y2,t)=>`<g stroke="#e0533d" stroke-width="1" fill="#e0533d"><path d="M${x1} ${y1}L${x2} ${y2}"/></g><text x="${(x1+x2)/2}" y="${(y1+y2)/2-4}" font-size="9.5" text-anchor="middle" fill="#e0533d">${t}</text>`;
+
+const PT={none:"無圖樣",sakura:"花瓣散點",wave:"和紋青海波",roundel:"干支圓章",stripe:"色動條紋",minhwa:"民畫牡丹",dots:"藝術圓點",ovalchain:"橢圓連紋",geo:"菱格幾何"};
+const LB={none:"無",diamond:"菱形標",oval:"橢圓標",rect:"長方標",seal:"圓章"};
+const LI={msg:"留言卡（燙金）",list:"明細清單卡",photo:"照片卡",pocket:"卡片口袋",print:"蓋內印花",mark:"蓋內燙金標誌"};
+function flower(cx,cy,r,c){let s="";for(let i=0;i<6;i++)s+=`<ellipse cx="${cx}" cy="${cy-r*.55}" rx="${r*.38}" ry="${r*.6}" fill="${c}" transform="rotate(${i*60} ${cx} ${cy})"/>`;return s+`<circle cx="${cx}" cy="${cy}" r="${r*.22}" fill="#f4c542"/>`}
+function patt(x,y,w,h){const t=S.pt;if(t==="none")return"";const id="pc"+Math.round(x+y*3+w*7),a=P().ac,m=Math.min(w,h);let g="";
+ if(t==="wave")for(let r=0;r<h/12+1;r++)for(let c=-1;c<w/24+1;c++){const cx=x+c*24+(r%2)*12,cy=y+r*12;g+=`<circle cx="${cx}" cy="${cy}" r="12" fill="none" stroke="${a}" stroke-opacity=".5"/><circle cx="${cx}" cy="${cy}" r="7" fill="none" stroke="${a}" stroke-opacity=".5"/>`}
+ if(t==="stripe"){const cs=["#e4572e","#f4c542","#4ea46a","#3b6fb6","#f6efe0"];for(let i=0;i<w/12+1;i++)g+=`<rect x="${x+i*12}" y="${y+h*.74}" width="12" height="${h*.26}" fill="${cs[i%5]}" opacity=".9"/>`}
+ if(t==="minhwa")g+=flower(x+w*.2,y+h*.3,m*.16,"#e98aa6")+flower(x+w*.8,y+h*.72,m*.2,"#d9577a")+`<ellipse cx="${x+w*.32}" cy="${y+h*.38}" rx="${m*.09}" ry="${m*.03}" fill="#4ea46a" transform="rotate(30 ${x+w*.32} ${y+h*.38})"/><ellipse cx="${x+w*.68}" cy="${y+h*.8}" rx="${m*.11}" ry="${m*.035}" fill="#4ea46a" transform="rotate(-25 ${x+w*.68} ${y+h*.8})"/>`;
+ if(t==="dots")for(let i=0;i<9;i++)for(let j=0;j<7;j++){const k=(i*7+j)%5;g+=`<circle cx="${x+w*(i+.5)/9}" cy="${y+h*(j+.5)/7}" r="${m*(.012+k*.008)}" fill="#2f4b8a" opacity="${.25+k*.1}"/>`}
+ if(t==="sakura")for(let i=0;i<14;i++){const px=x+((i*53)%100)/100*w,py=y+((i*37)%100)/100*h;g+=`<ellipse cx="${px}" cy="${py}" rx="${m*.03}" ry="${m*.018}" fill="#f3b3c4" transform="rotate(${i*40} ${px} ${py})" opacity=".85"/>`}
+ if(t==="ovalchain"){const cw=m*.11,ch=m*.17;for(let j=-1;j<h/(ch*.55)+1;j++)for(let i=-1;i<w/cw+1;i++){const px=x+i*cw+(j%2?cw/2:0),py=y+j*ch*.55;g+=`<ellipse cx="${px}" cy="${py}" rx="${cw*.3}" ry="${ch*.4}" fill="none" stroke="#efe3d0" stroke-opacity=".9" stroke-width="1.5"/>`;if(i%2===0&&j%2===0)g+=`<path d="M${px+cw/2} ${py-3}l2.5 3l-2.5 3l-2.5-3z" fill="${a}"/>`}}
+ if(t==="geo"){const c=m*.12;for(let j=-1;j<h/(c*.6)+1;j++)for(let i=-1;i<w/c+1;i++){const px=x+i*c+(j%2?c/2:0),py=y+j*c*.6;g+=`<path d="M${px} ${py-c*.3}L${px+c*.25} ${py}L${px} ${py+c*.3}L${px-c*.25} ${py}Z" fill="none" stroke="${a}" stroke-opacity=".6"/>`}}
+ if(t==="roundel"){const cx=x+w/2,cy=y+h/2,r=m*.3;g+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${a}" stroke-width="2.5" opacity=".8"/><circle cx="${cx}" cy="${cy}" r="${r*.88}" fill="none" stroke="${a}" stroke-dasharray="2 4" opacity=".8"/><text x="${cx}" y="${cy+r*.35}" font-size="${r*1.05}" text-anchor="middle" fill="${a}" font-weight="900" opacity=".85">午</text>`}
+ return `<clipPath id="${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9"/></clipPath><g clip-path="url(#${id})">${g}</g>`}
+const SHN={rect:"長方盒",round:"圓形盒",oval:"橢圓盒",fruit:"造型水果禮盒"};
+const PD={cookie:[6,6,"圓餅乾"],square:[6,6,"方酥"],long:[11,3.4,"蛋捲"],mac:[5.2,5.2,"馬卡龍"],heart:[6,6,"心形餅"],big:[8.5,8.5,"大塔派"],pouch:[9,2.6,"扁平酥片"],candy:[3.6,2.4,"糖果"],loaf:[17,6.5,"磅蛋糕"]};
+let G={x:0,y:0,w:1,h:1},DR=null,D3=null,TC={k:"",s:""};
+function ZZ(){const z={...SZ[S.size]};if(S.shape==="round")z.L=z.W=Math.min(z.L,z.W);if(S.shape==="oval"&&z.W>z.L*.8)z.W=f(z.L*.72);if(S.shape==="fruit"){const d=Math.max(14,Math.min(z.L,z.W));z.L=d;z.W=f(d*.95);z.H=f(z.H+4)}return z}
+function SH(x,y,w,h,a,r){r=r===undefined?9:r;const s=S.shape;if(s==="fruit")return`<path d="${fruitPath(x,y,w,h)}" ${a}/>`;if(s==="round"||s==="oval")return`<ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w/2}" ry="${h/2}" ${a}/>`;return`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" ${a}/>`}
+function ovSet(){const z=ZZ(),o=new Set(),a=S.pcs;for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++){const p=PD[a[i].t],q=PD[a[j].t];if(Math.abs(a[i].u-a[j].u)*z.L<(p[0]+q[0])/2*.78&&Math.abs(a[i].v-a[j].v)*z.W<(p[1]+q[1])/2*.78){o.add(i);o.add(j)}}return o}
+function prefill(){S.pcs=[];LY[S.last].c.forEach(c=>S.pcs.push({t:c[5]||(c[2]>=.5&&c[3]>=1?"big":S.it),u:c[0]+c[2]/2,v:c[1]+c[3]/2,r:0}))}
+function trayFree(x,y,w,h,p){const ppc=w/ZZ().L,ov=ovSet();let g=SH(x,y,w,h,`fill="${p.tr}"`,6);
+ if(!S.pcs.length)g+=`<text x="${x+w/2}" y="${y+h/2}" font-size="12" text-anchor="middle" fill="${p.ac}">從下方拖曳形狀放入</text>`;
+ S.pcs.forEach((q,i)=>{const d=PD[q.t],bw=d[0]*ppc,bh=d[1]*ppc,cx=x+q.u*w,cy=y+q.v*h,bx=cx-bw/2,by=cy-bh/2,hid=DR&&DR.i===i&&DR.out;
+  g+=`<g class="pc" data-i="${i}" transform="rotate(${q.r} ${cx} ${cy})" style="cursor:grab${hid?";opacity:.35":""}"><rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="transparent"/>${item(q.t==="big"?"cookie":q.t,bx,by,bw,bh,p)}${pieceMark(i,bx,by,bw,bh)}${ov.has(i)?`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="6" fill="none" stroke="#e0533d" stroke-dasharray="3 2"/>`:""}${S.sel===i?`<rect x="${bx-2}" y="${by-2}" width="${bw+4}" height="${bh+4}" rx="6" fill="none" stroke="${p.ac}" stroke-width="2"/>`:""}</g>`});
+ return g}
+function cells(x,y,w,h,pad){const p=P(),cl=S.shape==="round"||S.shape==="oval"||S.shape==="fruit",g=S.ly==="free"?trayFree(x,y,w,h,p):cells0(x,y,w,h,pad);if(!cl)return g;const id="tc"+Math.round(x*3+w*5);return`<clipPath id="${id}">${SH(x,y,w,h,"")}</clipPath><g clip-path="url(#${id})">${g}</g>`}
+function stripDim(s){return s.replace(/<g stroke="#e0533d"[^>]*><path[^>]*\/><\/g><text[^>]*>[^<]*<\/text>/g,"").replace(/<(rect|ellipse|path)[^>]*fill="rgba\(0,0,0,\.28\)"[^>]*\/>/g,"").replace(/<g class="wl">[\s\S]*?<\/g>/g,"").replace(/<(ellipse|path)[^>]*fill="rgba\(0,0,0,\.2\)"[^>]*\/>/g,"")}
+function v3d(){const z=ZZ(),p=P(),L=z.L,W=z.W,H=z.H,t=S.yaw*Math.PI/180,fi=S.tilt*Math.PI/180,k=235/(Math.hypot(L,W)+H*.3),ct=Math.cos(t),st=Math.sin(t),cf=Math.cos(fi),sf=Math.sin(fi);
+ const pt=(X,Y,Z)=>{const x=X*ct-Y*st,y=X*st+Y*ct,zz=Z-H/2;return[200+k*x,150+k*(y*sf-zz*cf),y*cf+zz*sf]};
+ const ell=S.shape==="round"||S.shape==="oval",N=40,segs=[],pol=S.shape==="fruit"?fruitPts(L,W):null;
+ if(pol){pol.forEach((A,i)=>{const B=pol[(i+1)%pol.length];let nn=[B[1]-A[1],A[0]-B[0]];if(nn[0]*(A[0]+B[0])+nn[1]*(A[1]+B[1])<0)nn=[-nn[0],-nn[1]];segs.push({A,B,n:nn})})}
+ else if(ell){for(let i=0;i<N;i++){const a=i/N*6.2832,b=(i+1)/N*6.2832,m=(a+b)/2;segs.push({A:[L/2*Math.cos(a),W/2*Math.sin(a)],B:[L/2*Math.cos(b),W/2*Math.sin(b)],n:[Math.cos(m)/(L/2),Math.sin(m)/(W/2)]})}}
+ else{const c=[[-L/2,-W/2],[L/2,-W/2],[L/2,W/2],[-L/2,W/2]],ns=[[0,-1],[1,0],[0,1],[-1,0]];for(let i=0;i<4;i++)segs.push({A:c[i],B:c[(i+1)%4],n:ns[i]})}
+ const bands=S.open?[[0,H,p.bx,0]]:[[0,H*.6,p.bx,0],[H*.6,H,p.lid,.12]],fs=[];
+ segs.forEach(sg=>{const l=Math.hypot(sg.n[0],sg.n[1]),nx=sg.n[0]/l,ny=sg.n[1]/l,nyr=nx*st+ny*ct,nxr=nx*ct-ny*st;if(nyr<=0)return;const sh=.55+.45*Math.max(0,nxr*-.5+nyr*.6);
+  bands.forEach(b=>{const kk=b[3]>0?1.025:1,Q=[pt(sg.A[0]*kk,sg.A[1]*kk,b[0]),pt(sg.B[0]*kk,sg.B[1]*kk,b[0]),pt(sg.B[0]*kk,sg.B[1]*kk,b[1]),pt(sg.A[0]*kk,sg.A[1]*kk,b[1])],d=(Q[0][2]+Q[1][2]+Q[2][2]+Q[3][2])/4,pts=Q.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join(" ");fs.push([d,`<polygon points="${pts}" fill="${b[2]}" stroke="${b[2]}" stroke-width=".6"/><polygon points="${pts}" fill="#000" fill-opacity="${Math.max(0,(1-sh)*.6-b[3]).toFixed(2)}"/>`])})});
+ fs.sort((a,b)=>a[0]-b[0]);
+ const K=S.open?1:1.025,O=pt(0,0,H),X=pt(1,0,H),Y=pt(0,1,H),s=Math.min(310/L,215/W),vx=[(X[0]-O[0])*K,(X[1]-O[1])*K],vy=[(Y[0]-O[0])*K,(Y[1]-O[1])*K];
+ const key=[S.shape,S.size,S.col,[...S.dc].join(),S.pt,S.ly,S.it,S.open,S.lb,S.t1,S.t2,S.t3,JSON.stringify(S.pcs)].join("|");
+ if(TC.k!==key)TC={k:key,s:stripDim(S.open?vIn():vOut())};
+ const mtx=[vx[0]/s,vx[1]/s,vy[0]/s,vy[1]/s,O[0]-200*vx[0]/s-140*vy[0]/s,O[1]-200*vx[1]/s-140*vy[1]/s].map(n=>n.toFixed(4)).join(" "),rr=k*Math.hypot(L,W)*.5;
+ let g=`<ellipse cx="200" cy="${150+k*H/2*cf+6}" rx="${rr}" ry="${rr*sf*.8}" fill="rgba(0,0,0,.16)"/>`+fs.map(a=>a[1]).join("")+`<g transform="matrix(${mtx})">${TC.s}</g>`;
+ return g+`<text x="200" y="292" font-size="10" text-anchor="middle" fill="#888">拖曳畫面或使用下方拉桿旋轉</text>`}
+function vNetR(){const z=ZZ(),a=z.L/2,b=z.W/2,per=S.shape==="fruit"?f(fruitPer(z.L,z.W)):f(Math.PI*(3*(a+b)-Math.sqrt((3*a+b)*(a+3*b)))),H=z.H,s=Math.min(360/(per+2),190/(H+z.W+4)),p=P(),sty=`fill="${p.bx}" fill-opacity=".35" stroke="#333" stroke-width="1.4"`,x=200-(per+2)*s/2,y=40,bw=per*s;
+ return`<rect x="${x}" y="${y}" width="${bw}" height="${H*s}" ${sty}/><rect x="${x+bw}" y="${y}" width="${2*s}" height="${H*s}" ${sty} stroke-dasharray="4 3"/><text x="${x+bw/2}" y="${y+H*s/2+4}" font-size="10" text-anchor="middle" fill="#888">側牆展開 周長 ${per} cm＋糊邊 2 cm</text>${SH(200-z.L*s/2,y+H*s+14,z.L*s,z.W*s,sty+' stroke-dasharray="5 3"')}<text x="200" y="${y+H*s+18+z.W*s/2}" font-size="11" text-anchor="middle" fill="#888">底板 ${z.L}×${z.W}</text>`+dim(x,y-10,x+bw,y-10,per+" cm")+dim(x-12,y,x-12,y+H*s,H+"")+`<text x="200" y="14" font-size="10" text-anchor="middle" fill="#888">虛線＝折線　實線＝裁切線（盒身展開）</text>`}
+function fruitPts(L,W){const a=[];for(let i=0;i<72;i++){const t=i/72*6.28319,x0=.5*Math.cos(t),y0=.5*Math.sin(t),m=1-.14*(y0+.5);a.push([x0*m*L,(y0+(y0<0?.1*Math.exp(-Math.pow(x0/.14,2)):0))*W])}return a}
+function fruitPath(x,y,w,h){return"M"+fruitPts(w,h).map(q=>(x+w/2+q[0]).toFixed(1)+" "+(y+h/2+q[1]).toFixed(1)).join("L")+"Z"}
+function fruitPer(L,W){const a=fruitPts(L,W);let s=0;a.forEach((q,i)=>{const r=a[(i+1)%a.length];s+=Math.hypot(r[0]-q[0],r[1]-q[1])});return s}
+function leaf(x,y,w,h,cx){return`<path d="M${cx} ${y+h*.12}Q${cx+3} ${y+h*.04} ${cx+6} ${y}" stroke="#6b4a2a" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M${cx+4} ${y+h*.05}C${cx+w*.1} ${y-h*.04} ${cx+w*.2} ${y} ${cx+w*.23} ${y+h*.09}C${cx+w*.14} ${y+h*.14} ${cx+w*.07} ${y+h*.12} ${cx+4} ${y+h*.05}Z" fill="#6aa65b" stroke="rgba(0,0,0,.25)"/>`}
+const PCOL=["#9db08c","#dcb98b","#b5402f","#cfccc6"];
+function esc(t){return String(t).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]))}
+function tlen(t){return[...t].reduce((a,c)=>a+(c.charCodeAt(0)>255?1:.6),0)}
+function pouch(x,y,w,h,c){return`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(h*.2,3)}" fill="${c}"/><rect x="${x+2}" y="${y+h*.2}" width="${w-4}" height="${h*.6}" fill="none" stroke="#fff" stroke-opacity=".45" stroke-dasharray="1.5 1.5" stroke-width=".8"/>`}
+function candy(cx,cy,r,c){return`<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r*.62}" fill="${c}" stroke="rgba(0,0,0,.18)"/><path d="M${cx-r} ${cy}l${-r*.6} ${-r*.45}v${r*.9}zM${cx+r} ${cy}l${r*.6} ${-r*.45}v${r*.9}z" fill="${c}"/><circle cx="${cx-r*.3}" cy="${cy-r*.12}" r="${r*.07}" fill="#4a3a38" opacity=".55"/><circle cx="${cx+r*.25}" cy="${cy+r*.16}" r="${r*.07}" fill="#4a3a38" opacity=".55"/>`}
+function libDraw(mode){return(x,y,w,h,p)=>{const pn=p.pn||"#f0d9c8",gold="#d9b26b";let g="";
+ if(mode==="C"){g+=`<rect x="${x+w*.285}" y="${y+h*.1}" width="${w*.015}" height="${h*.8}" fill="${pn}"/><rect x="${x+w*.7}" y="${y+h*.1}" width="${w*.015}" height="${h*.8}" fill="${pn}"/>`;
+  [[.17,.3],[.12,.46],[.2,.5],[.14,.68],[.2,.78]].forEach((q,i)=>{g+=candy(x+w*q[0],y+h*q[1],w*.03,["#e9a0b0","#a9cdb0","#f0c9a0"][i%3])});
+  [[.83,.3],[.88,.46],[.8,.5],[.86,.68],[.8,.78]].forEach((q,i)=>{g+=candy(x+w*q[0],y+h*q[1],w*.03,["#f0c9a0","#e9a0b0","#a9cdb0"][i%3])})}
+ else{g+=`<rect x="${x+w*.07}" y="${y+h*.1}" width="${w*.22}" height="${h*.8}" rx="6" fill="${pn}"/><rect x="${x+w*.71}" y="${y+h*.1}" width="${w*.22}" height="${h*.8}" rx="6" fill="${pn}"/><ellipse cx="${x+w*.18}" cy="${y+h*.5}" rx="${w*.07}" ry="${h*.15}" fill="none" stroke="${gold}" stroke-width="1.2"/><text x="${x+w*.18}" y="${y+h*.51}" font-size="${h*.05}" text-anchor="middle" fill="${gold}">${esc(S.t3)}</text>`+[.28,.34,.4,.46,.52].map(k=>`<path d="M${x+w*.74} ${y+h*k}h${w*.16}" stroke="#a88f7d" stroke-width="1.4"/>`).join("")+`<circle cx="${x+w*.82}" cy="${y+h*.8}" r="${w*.022}" fill="${gold}"/>`}
+ if(mode==="L")g+=item("loaf",x+w*.31,y+h*.1,w*.38,h*.8,p)+slotDeco(0,x+w*.31,y+h*.1,w*.38,h*.8,0);
+ else{const ph=h*.76/12;for(let i=0;i<12;i++)g+=pouch(x+w*.31,y+h*.12+i*ph,w*.38,ph*.88,PCOL[Math.floor(i/3)])+slotDeco(i,x+w*.31,y+h*.12+i*ph,w*.38,ph*.88,0,1)}
+ return g}}
+function lbl(cx,cy,w,h,p){const k=S.lb;if(k==="none")return"";const r=Math.min(w,h)*.3,tx="#4a3438",c1=esc(S.t1),c2=esc(S.t2),mk=esc(S.t3),f1=Math.min(r*.24,r*1.7/Math.max(tlen(S.t1),1)),f2=Math.min(r*.15,r*1.7/Math.max(tlen(S.t2),1));let sh="";
+ const ring='fill="none" stroke="'+tx+'" stroke-opacity=".55" stroke-dasharray="1.5 2.5" stroke-width="1.6"';
+ if(k==="diamond")sh=`<path d="M${cx} ${cy-r*1.1}L${cx+r*1.1} ${cy}L${cx} ${cy+r*1.1}L${cx-r*1.1} ${cy}Z" fill="${p.ac}"/><path d="M${cx} ${cy-r*.98}L${cx+r*.98} ${cy}L${cx} ${cy+r*.98}L${cx-r*.98} ${cy}Z" ${ring}/>`;
+ else if(k==="oval")sh=`<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r*1.2}" fill="${p.ac}"/><ellipse cx="${cx}" cy="${cy}" rx="${r*.92}" ry="${r*1.12}" ${ring}/>`;
+ else if(k==="rect")sh=`<rect x="${cx-r*1.15}" y="${cy-r*.85}" width="${r*2.3}" height="${r*1.7}" rx="4" fill="${p.ac}"/><rect x="${cx-r*1.07}" y="${cy-r*.77}" width="${r*2.14}" height="${r*1.54}" rx="3" ${ring}/>`;
+ else sh=`<circle cx="${cx}" cy="${cy}" r="${r*1.05}" fill="${p.ac}"/><circle cx="${cx}" cy="${cy}" r="${r*.95}" ${ring}/>`;
+ return sh+`<g fill="${tx}" text-anchor="middle" font-family="Noto Serif TC,serif"><circle cx="${cx}" cy="${cy-r*.5}" r="${r*.2}" fill="none" stroke="${tx}" stroke-width="1"/><text x="${cx}" y="${cy-r*.5+r*.08}" font-size="${r*.22}" font-weight="700">${mk}</text><text x="${cx}" y="${cy+r*.1}" font-size="${f1}" font-weight="700" letter-spacing="1">${c1}</text><path d="M${cx-r*.5} ${cy+r*.24}h${r}" stroke="${tx}" stroke-opacity=".5"/><text x="${cx}" y="${cy+r*.46}" font-size="${f2}">${c2}</text></g>`}
+function vPair(){const a=stripDim(vOut()),b=stripDim(vIn());return`<g transform="translate(-6 11) scale(.62)">${a}</g><g transform="translate(140 98) scale(.64)">${b}</g><text x="200" y="292" font-size="10" text-anchor="middle" fill="#888">天地蓋：蓋子與盒身分開，開箱時並排的樣子</text>`}
+function vLid(){const z=ZZ(),p=P(),s=Math.min(310/z.L,215/z.W),w=z.L*s,h=z.W*s,x=200-w/2,y=140-h/2,cx=200,cy=140,gold="#d9b26b",pn=p.pn||"#f0d9c8",id="lid"+Math.round(w+h);
+ let g=SH(x+4,y+8,w,h,'fill="rgba(0,0,0,.2)"')+SH(x,y,w,h,`fill="${p.bx}"`)+SH(x+7,y+7,w-14,h-14,`fill="none" stroke="${gold}" stroke-opacity=".5" stroke-dasharray="2 3"`,6),c="";
+ if(S.li.has("print"))c+=`<g opacity=".35">${patt(x,y,w,h)}</g>`;
+ if(S.li.has("pocket"))c+=`<path d="M${cx-w*.28} ${cy+h*.32}V${cy+h*.02}H${cx+w*.28}V${cy+h*.32}Z" fill="${pn}" stroke="rgba(0,0,0,.2)"/><path d="M${cx-w*.28} ${cy+h*.02}Q${cx} ${cy+h*.12} ${cx+w*.28} ${cy+h*.02}" fill="none" stroke="rgba(0,0,0,.25)"/><path d="M${cx-w*.25} ${cy+h*.29}H${cx+w*.25}" stroke="#fff" stroke-opacity=".6" stroke-dasharray="3 3"/>`;
+ if(S.li.has("photo"))c+=`<g transform="translate(${cx-w*.34} ${cy-h*.36}) rotate(-8)"><rect width="${w*.2}" height="${h*.34}" fill="#fff" stroke="rgba(0,0,0,.2)"/><rect x="${w*.015}" y="${w*.015}" width="${w*.17}" height="${h*.23}" fill="${p.ac}"/><path d="M${w*.03} ${h*.3}h${w*.09}" stroke="${p.ac}" stroke-width="2"/></g>`;
+ if(S.li.has("list"))c+=`<g transform="translate(${cx+w*.1} ${cy-h*.4}) rotate(7)"><rect width="${w*.26}" height="${h*.56}" fill="#fbf4e6" stroke="rgba(0,0,0,.2)"/><text x="${w*.02}" y="${h*.07}" font-size="${h*.04}" fill="#6a5a4a" font-family="monospace">ITEM      QTY</text>`+[IT[S.it],"糖果","茶包","磅蛋糕"].map((t,i)=>`<path d="M${w*.02} ${h*(.17+i*.08)}h${w*.22}" stroke="#c9b9a2"/><text x="${w*.02}" y="${h*(.155+i*.08)}" font-size="${h*.035}" fill="#6a5a4a">${t}</text>`).join("")+`</g>`;
+ if(S.li.has("msg"))c+=`<g transform="translate(${cx-w*.4} ${cy-h*.02}) rotate(-9)"><rect width="${w*.3}" height="${h*.3}" fill="#2a3a33" stroke="rgba(255,255,255,.2)"/><circle cx="${w*.15}" cy="${h*.07}" r="${h*.04}" fill="none" stroke="${gold}"/><text x="${w*.15}" y="${h*.082}" font-size="${h*.04}" text-anchor="middle" fill="${gold}">${esc(S.t3)}</text><path d="M${w*.04} ${h*.15}h${w*.22}M${w*.04} ${h*.19}h${w*.18}M${w*.04} ${h*.23}h${w*.2}" stroke="${gold}" stroke-opacity=".8"/></g>`;
+ if(S.li.has("mark"))c+=`<circle cx="${cx}" cy="${y+h*.14}" r="${h*.07}" fill="none" stroke="${gold}" stroke-width="1.5"/><text x="${cx}" y="${y+h*.14+h*.025}" font-size="${h*.07}" text-anchor="middle" fill="${gold}">${esc(S.t3)}</text>`;
+ g+=`<clipPath id="${id}">${SH(x,y,w,h,"")}</clipPath><g clip-path="url(#${id})">${c}</g>`;
+ return g+`<text x="200" y="292" font-size="10" text-anchor="middle" fill="#888">蓋內：${[...S.li].map(k=>LI[k]).join("、")||"未選擇巧思"}</text>`}
+function textGrp(){const g=document.createElement("div");g.className="grp rv in";g.innerHTML='<h3>蓋面文字與標誌<small>同步到蓋面、開蓋與蓋內</small></h3><div class="tin"><label>主標<input id="t1" maxlength="18"></label><label>副標<input id="t2" maxlength="28"></label><label>標誌字<input id="t3" maxlength="2"></label></div>';ctl.appendChild(g);["t1","t2","t3"].forEach(k=>{const el=g.querySelector("#"+k);el.value=S[k];el.oninput=()=>{S[k]=el.value;if(["out","d3","pair","lid"].includes(S.view))rdraw();else setView("d3")}})}
+const MD=JSON.parse($("#pd").textContent),PK={};
+Object.assign(S,{cu:0,ty:new Set(),show:40,q:"",slots:[],slot:0});
+const hueOf=t=>(t*47+20)%360;
+const nSlots=()=>S.ly==="free"?S.pcs.length:LY[S.ly].c.length;
+const slotGet=i=>S.ly==="free"?(S.pcs[i]||{}).m:S.slots[i];
+function slotSet(i,v){if(S.ly==="free"){if(S.pcs[i])S.pcs[i].m=v}else S.slots[i]=v}
+let MM=[];
+const mmatch=()=>{const q=S.q.trim().toLowerCase();return MD.r.filter(r=>(S.cu<=0||r[2]===S.cu)&&(!S.ty.size||S.ty.has(r[3]))&&(!q||r[1].toLowerCase().includes(q)))};
+function toast(t){let e=document.getElementById("toast");if(!e){e=document.createElement("div");e.id="toast";e.setAttribute("role","status");document.body.appendChild(e)}e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),2200)}
+function slotDeco(i,a,b,cw,ch,e,cmp){if(S.view!=="in")return"";const it=slotGet(i),sel=S.slot===i,cx=a+cw/2;let g="";
+ const sh=e?`<ellipse cx="${cx}" cy="${b+ch/2}" rx="${cw/2}" ry="${ch/2}"`:`<rect x="${a}" y="${b}" width="${cw}" height="${ch}" rx="5"`;
+ if(sel)g+=sh+' fill="none" stroke="#fff" stroke-width="2.2" stroke-dasharray="4 2"/>';
+ const r=cmp?Math.min(5,ch*.42):7,bx=cmp?a+r+2:a+r+4,by=cmp?b+ch/2:b+r+4;
+ g+=`<circle cx="${bx}" cy="${by}" r="${r}" fill="${it?`hsl(${hueOf(it[3])} 55% 42%)`:"rgba(0,0,0,.55)"}" stroke="#fff" stroke-opacity=".8"/><text x="${bx}" y="${by+r*.36}" font-size="${r*1.05}" text-anchor="middle" fill="#fff" font-weight="700">${i+1}</text>`;
+ if(it&&!cmp&&cw>56){const n=Math.max(3,Math.floor(cw/9)),ar=[...it[1]],nm=ar.slice(0,n).join("")+(ar.length>n?"…":"");g+=`<text x="${cx}" y="${b+ch-5}" font-size="8.5" text-anchor="middle" fill="#fff" stroke="rgba(0,0,0,.65)" stroke-width="2.4" paint-order="stroke">${esc(nm)}</text>`}
+ return g+`<rect class="sl" data-slot="${i}" x="${a}" y="${b}" width="${cw}" height="${ch}" fill="transparent" style="cursor:pointer"/>`}
+function pieceMark(i,x,y,w,h){if(S.view!=="in")return"";const it=slotGet(i),r=Math.min(7,Math.min(w,h)*.3),bx=x+r+1,by=y+r+1;return`<circle cx="${bx}" cy="${by}" r="${r}" fill="${it?`hsl(${hueOf(it[3])} 55% 42%)`:"rgba(0,0,0,.55)"}" stroke="#fff" stroke-opacity=".8"/><text x="${bx}" y="${by+r*.36}" font-size="${r*1.05}" text-anchor="middle" fill="#fff" font-weight="700">${i+1}</text>`}
+function tchips(host,arr,isOn,fn){host.innerHTML=arr.map(([k,l])=>`<button type="button" class="chip" aria-pressed="${isOn(k)}" data-k="${k}">${esc(l)}</button>`).join("");host.onclick=e=>{const c=e.target.closest(".chip");if(c)fn(c.dataset.k)}}
+function drawTaste(){tchips(PK.cc,[[0,"不限"],[-1,"隨機"],...MD.c.map((c,i)=>[i+1,c])],k=>+k===S.cu,k=>{S.cu=+k;S.show=40;drawTaste();drawList()});
+ const ord=["甜點","餅乾","義大利麵","炒飯","炒麵","主菜","沙拉","湯品","前菜","點心","麵包","水果"].map(n=>MD.t.indexOf(n)).filter(i=>i>=0);
+ tchips(PK.ct,ord.map(i=>[i,MD.t[i]]),k=>S.ty.has(+k),k=>{k=+k;S.ty.has(k)?S.ty.delete(k):S.ty.add(k);S.show=40;drawTaste();drawList()})}
+function tasteGrp(){const g=document.createElement("div");g.className="grp rv in";g.innerHTML='<h3>口味設定<small>Taste</small></h3><p class="hint" style="margin-top:0">口味（單選）</p><div class="chips" id="cc"></div><p class="hint">餐點類型（可複選，不選代表全部）</p><div class="chips" id="ct"></div><p class="hint" id="mc"></p>';ctl.appendChild(g);PK.cc=g.querySelector("#cc");PK.ct=g.querySelector("#ct");PK.mc=g.querySelector("#mc");drawTaste()}
+function drawList(){if(!PK.list)return;MM=mmatch();PK.mc&&(PK.mc.innerHTML=`目前符合 <b>${MM.length.toLocaleString()}</b> 道餐點`);
+ PK.list.innerHTML=MM.length?MM.slice(0,S.show).map((r,i)=>`<button type="button" class="it" data-j="${i}"><span>${esc(r[1])}</span><code>${esc(MD.t[r[3]])}</code></button>`).join(""):'<p class="hint">沒有符合的菜色，試著放寬風味或餐點類型。</p>';PK.more.hidden=MM.length<=S.show}
+function pickStatus(){if(!PK.sl)return;const n=nSlots();S.slot=Math.max(0,Math.min(S.slot,Math.max(n-1,0)));
+ if(S.ly!=="free")S.slots.length=Math.min(S.slots.length,n);
+ const cur=slotGet(S.slot);PK.sl.innerHTML=n?`正在選第 <b>${S.slot+1}</b> 格${cur?"（目前：「"+esc(cur[1])+"」）":""}`:"內襯目前沒有格位，請先在「內襯格局」選擇格局或放入形狀。";
+ let f=0;PK.sum.innerHTML=Array.from({length:n},(_,i)=>{const it=slotGet(i);if(it)f++;return`<li data-i="${i}" class="${S.slot===i?"sel":""}"><i>${i+1}</i>${it?`<span>${esc(it[1])}</span><code>${esc(MD.t[it[3]])}</code><button type="button" class="rm" data-r="${i}" aria-label="移除">×</button>`:'<span style="color:var(--mute)">尚未選擇</span>'}</li>`}).join("");PK.prog.textContent=f+" / "+n}
+function pickRefresh(){S.view==="in"?rdraw():pickStatus()}
+function pickGrp(){const g=document.createElement("div");g.className="grp rv in";
+ g.innerHTML='<h3>挑選內容物<small>口味＋食物本體</small></h3><p class="hint" id="sl" style="margin-top:0"></p><input class="srch" type="search" placeholder="搜尋口味或食物，例如：巧克力" aria-label="搜尋菜單"><div class="mlist" id="mlist"></div><button class="chip" type="button" id="mmore" hidden style="margin-top:8px">顯示更多</button><div class="pbtn"><button class="chip" type="button" id="mauto">隨機填滿空格</button><button class="chip" type="button" id="mclr">清空</button><button class="chip" type="button" id="mcopy">複製清單</button></div><p class="hint">內容物清單　<b id="mprog"></b></p><ul class="msum" id="msum"></ul>';
+ ctl.appendChild(g);PK.sl=g.querySelector("#sl");PK.q=g.querySelector(".srch");PK.list=g.querySelector("#mlist");PK.more=g.querySelector("#mmore");PK.sum=g.querySelector("#msum");PK.prog=g.querySelector("#mprog");
+ PK.q.value=S.q;let tm;PK.q.oninput=()=>{clearTimeout(tm);tm=setTimeout(()=>{S.q=PK.q.value;S.show=40;drawList()},150)};
+ PK.list.onclick=e=>{const b=e.target.closest(".it");if(!b)return;const n=nSlots();if(!n){toast("請先在內襯放入形狀或選擇格局");return}const i=Math.min(S.slot,n-1);slotSet(i,MM[+b.dataset.j]);let nx=-1;for(let k=1;k<=n;k++){const j=(i+k)%n;if(!slotGet(j)){nx=j;break}}S.slot=nx>=0?nx:i;if(S.view!=="in")setView("in");else rdraw()};
+ PK.more.onclick=()=>{S.show+=40;drawList()};
+ g.querySelector("#mauto").onclick=()=>{if(!MM.length)return toast("沒有符合的菜色可以選");const n=nSlots();if(!n)return toast("請先在內襯放入形狀或選擇格局");const pick=()=>{if(S.cu===-1){const c=1+Math.floor(Math.random()*8),p=MM.filter(r=>r[2]===c);if(p.length)return p[Math.floor(Math.random()*p.length)]}return MM[Math.floor(Math.random()*MM.length)]};for(let i=0;i<n;i++)if(!slotGet(i))slotSet(i,pick());pickRefresh();toast("已隨機填滿空格")};
+ g.querySelector("#mclr").onclick=()=>{S.slots=[];S.pcs.forEach(q=>q.m=null);S.slot=0;pickRefresh()};
+ g.querySelector("#mcopy").onclick=async()=>{const n=nSlots(),t="包裝模組｜"+SHN[S.shape]+"・"+LY[S.ly].n+"（"+n+" 格）\n"+Array.from({length:n},(_,i)=>{const it=slotGet(i);return`${i+1}. ${it?it[1]:"（未選）"}`}).join("\n");try{await navigator.clipboard.writeText(t);toast("已複製內容清單")}catch(_){toast("無法自動複製，請手動選取清單")}};
+ PK.sum.onclick=e=>{const r=e.target.closest(".rm");if(r){slotSet(+r.dataset.r,null);S.slot=+r.dataset.r;return pickRefresh()}const li=e.target.closest("li");if(li){S.slot=+li.dataset.i;if(S.view!=="in")setView("in");else rdraw()}};
+ drawList();pickStatus()}
+function ui(){const fr=S.ly==="free";$("#pal").hidden=!(fr&&S.view==="in");$("#c3d").hidden=S.view!=="d3";$("#cv").classList.toggle("free",(fr&&S.view==="in")||S.view==="d3")}
+function rdraw(){$("#cv").innerHTML="<g>"+V[S.view]()+"</g>";spec();if(S.view==="in")pickStatus()}
+function draw(){if(S.ly!=="free"){S.last=S.ly;S.cleared=false}else if(!S.pcs.length&&!S.cleared)prefill();const c=$("#cv");c.classList.remove("pop");c.innerHTML="<g>"+V[S.view]()+"</g>";void c.getBBox;requestAnimationFrame(()=>c.classList.add("pop"));spec();ui();pickStatus()}
+function vOut(){const z=ZZ(),p=P(),s=Math.min(310/z.L,215/z.W),w=z.L*s,h=z.W*s,x=200-w/2,y=140-h/2,cx=200,cy=140;let g=`${SH(x+5,y+10,w,h,'fill="rgba(0,0,0,.28)"')}${SH(x,y,w,h,`fill="${p.lid}"`)}${patt(x,y,w,h)}${SH(x+6,y+6,w-12,h-12,`fill="none" stroke="${p.ac}" stroke-opacity=".6" stroke-dasharray="3 3"`,6)}`;
+ if(S.dc.has("window")){const a=x+w*.14,b=y+h*.14,c=w*.72,d=h*.72;g+=cells(a,b,c,d,3)+`<rect x="${a}" y="${b}" width="${c}" height="${d}" rx="6" fill="rgba(255,255,255,.12)" stroke="${p.ac}" stroke-width="2"/>`}
+ if(S.dc.has("ribbon"))g+=`<rect x="${x}" y="${cy-7}" width="${w}" height="14" fill="${p.ac}"/><rect x="${cx-7}" y="${y}" width="14" height="${h}" fill="${p.ac}"/><g transform="translate(${cx} ${cy})" fill="${p.ac}" stroke="rgba(0,0,0,.25)"><path d="M0 0C-34-30-42 10 0 0C34-30 42 10 0 0"/><path d="M0 0l-14 26M0 0l14 26" stroke-width="5"/><circle r="6"/></g>`;
+ if(S.dc.has("label"))g+=`<g transform="translate(${cx} ${y+h*.83})"><rect x="-46" y="-15" width="92" height="30" rx="4" fill="#fffaf0" stroke="#c9a24a" stroke-width="1.6"/><text y="5" font-size="13" text-anchor="middle" fill="#8a6a22" font-family="Noto Serif TC,serif" font-weight="700">手作餅乾</text></g>`;
+ if(S.dc.has("wax"))g+=`<g transform="translate(${x+w*.86} ${y+h*.17})"><circle r="17" fill="#9d2f3a"/><circle r="12" fill="none" stroke="#ffd7c4" stroke-opacity=".6"/><text y="5" font-size="14" text-anchor="middle" fill="#ffd7c4">甜</text></g>`;
+ if(S.dc.has("twine")){const a=x+w*.2;g+=`<path d="M${a} ${y}V${y+h}" stroke="#a8844f" stroke-width="3" stroke-dasharray="6 2"/>`+[["#f2a7b8",-8,-6],["#f6d36b",6,-10],["#fff",0,4],["#b9a3e0",-12,8],["#8fbf7a",12,6]].map(d=>`<circle cx="${a+d[1]}" cy="${y+h*.18+d[2]}" r="6" fill="${d[0]}" stroke="rgba(0,0,0,.2)"/>`).join("")}
+ g+=lbl(cx,cy,w,h,p);
+ if(S.dc.has("bowtag")){const bc="#6b4326",tw=Math.min(46,w*.27),th=Math.min(60,h*.46);g+=`<path d="M${cx-3} ${y}V${y+h}M${cx+3} ${y}V${y+h}" stroke="${bc}" stroke-width="2" fill="none"/><g transform="translate(${cx+w*.15} ${cy-th*.45}) rotate(-16)"><path d="M${tw*.1} 0C0 -10-6 -4-4 6" stroke="${bc}" fill="none" stroke-width="1.2"/><rect x="0" y="0" width="${tw}" height="${th}" rx="3" fill="#fffaf2" stroke="rgba(0,0,0,.28)"/><circle cx="${tw*.15}" cy="6" r="2" fill="none" stroke="#999"/><path d="M${tw*.15} ${th*.3}h${tw*.7}M${tw*.15} ${th*.45}h${tw*.55}M${tw*.15} ${th*.6}h${tw*.65}" stroke="#b9a58a" stroke-width="1.6"/></g><g transform="translate(${cx} ${cy})" fill="none" stroke="${bc}" stroke-width="2.6" stroke-linecap="round"><path d="M0 0C-26-24-36 6-6 5M0 0C26-24 36 6 6 5M-2 3C-10 16-16 22-20 31M2 3C10 16 16 22 20 31"/><circle r="3.2" fill="${bc}"/></g>`}
+ if(S.shape==="round"||S.shape==="oval"||S.shape==="fruit"){const id="lc"+Math.round(w*3+h),d=Math.max(10,h*.12),fr=S.shape==="fruit";let wl="";if(fr){for(let k=0;k<=d;k+=2)wl+=SH(x,y+k,w,h,`fill="${p.bx}"`)}else wl=`<ellipse cx="${cx}" cy="${cy+d}" rx="${w/2}" ry="${h/2}" fill="${p.bx}"/><rect x="${x}" y="${cy}" width="${w}" height="${d}" fill="${p.bx}"/>`;g=`${fr?SH(x,y+d+10,w,h,'fill="rgba(0,0,0,.2)"'):`<ellipse cx="${cx}" cy="${cy+d+10}" rx="${w/2}" ry="${h/2}" fill="rgba(0,0,0,.2)"/>`}<g class="wl">${wl}</g><clipPath id="${id}">${SH(x,y,w,h,"")}</clipPath><g clip-path="url(#${id})">${g}</g>${SH(x,y,w,h,'fill="none" stroke="rgba(0,0,0,.22)"')}${fr?leaf(x,y,w,h,cx):""}`}
+ return g+dim(x,y+h+14,x+w,y+h+14,z.L+" cm")+dim(x-14,y,x-14,y+h,z.W+" cm")}
+function vIn(){const z=ZZ(),s=Math.min(310/z.L,215/z.W),w=z.L*s,h=z.W*s,x=200-w/2,y=140-h/2,p=P();G={x,y,w,h};return`${SH(x-6,y-6,w+12,h+12,`fill="${p.bx}"`,12)}${SH(x-6,y-6,w+12,h+12,'fill="none" stroke="rgba(0,0,0,.25)"',12)}`+cells(x,y,w,h,4)+dim(x,y+h+18,x+w,y+h+18,f(z.L-1)+" cm 內寸")+dim(x-16,y,x-16,y+h,f(z.W-1)+"")}
+function vNet(){if(S.shape==="round"||S.shape==="oval"||S.shape==="fruit")return vNetR();const z=ZZ(),H=z.H,s=Math.min(360/(z.L+2*H),265/(z.W+2*H)),L=z.L*s,W=z.W*s,h=H*s,x=200-L/2,y=150-W/2,p=P(),st=`fill="${p.bx}" fill-opacity=".35" stroke="#333" stroke-width="1.4"`;
+ return`<rect x="${x}" y="${y}" width="${L}" height="${W}" ${st} stroke-dasharray="5 3"/><rect x="${x}" y="${y-h}" width="${L}" height="${h}" ${st}/><rect x="${x}" y="${y+W}" width="${L}" height="${h}" ${st}/><rect x="${x-h}" y="${y}" width="${h}" height="${W}" ${st}/><rect x="${x+L}" y="${y}" width="${h}" height="${W}" ${st}/><text x="200" y="${y+W/2+4}" font-size="11" text-anchor="middle" fill="#888">底板 ${z.L}×${z.W}</text>`+dim(x,y+W+h+14,x+L,y+W+h+14,z.L)+dim(x+L+h+14,y,x+L+h+14,y+W,z.W)+dim(x-h,y-h-8,x,y-h-8,H)+`<text x="200" y="14" font-size="10" text-anchor="middle" fill="#888">虛線＝折線　實線＝裁切線（盒身展開）</text>`}
+function bagD(){const z=ZZ();return{w:z.L+4,d:f(z.H+3.5),h:z.W+6}}
+function vBag(){const b=bagD(),p=P(),s=Math.min(220/b.w,200/b.h),w=b.w*s,h=b.h*s,d=b.d*s*.6,x=200-(w+d)/2,y=100,hc=S.bag==="boxbag"?"#222":p.ac;let g=`<ellipse cx="200" cy="${y+h+14}" rx="${w*.6}" ry="8" fill="rgba(0,0,0,.2)"/><path d="M${x+w} ${y}l${d} -10v${h}l${-d} 10z" fill="${p.bx}" filter="brightness(.8)"/><path d="M${x+w} ${y}l${d} -10v${h}l${-d} 10z" fill="rgba(0,0,0,.2)"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${p.lid}"/>${patt(x,y,w,h)}`;
+ const m=x+w/2;
+ if(S.bag==="hand")g+=`<path d="M${m-w*.2} ${y}c0 -50 ${w*.4} -50 ${w*.4} 0" fill="none" stroke="${hc}" stroke-width="7"/>`;
+ if(S.bag==="rope")g+=`<path d="M${m-w*.2} ${y+8}C${m-w*.2} ${y-62} ${m+w*.2} ${y-62} ${m+w*.2} ${y+8}" fill="none" stroke="${hc}" stroke-width="3.5"/><circle cx="${m-w*.2}" cy="${y+8}" r="5" fill="${hc}"/><circle cx="${m+w*.2}" cy="${y+8}" r="5" fill="${hc}"/>`;
+ if(S.bag==="ribbon")g+=`<path d="M${m-w*.2} ${y+6}C${m-w*.2} ${y-60} ${m+w*.2} ${y-60} ${m+w*.2} ${y+6}" fill="none" stroke="${hc}" stroke-width="10"/>`;
+ if(S.bag==="boxbag")g+=`<path d="M${x} ${y}l${d} -10h${w}l${-d} 10z" fill="${p.bx}"/><path d="M${m-26} ${y-4}v-24h52v24" fill="none" stroke="${p.ac}" stroke-width="8"/>`;
+ if(S.bd.has("dots"))for(let i=0;i<5;i++)for(let j=0;j<7;j++)g+=`<circle cx="${x+w*(.1+i*.2)}" cy="${y+h*(.08+j*.14)}" r="1.6" fill="${p.ac}" fill-opacity=".45"/>`;
+ if(S.bd.has("foil"))g+=`<rect x="${x}" y="${y+h-14}" width="${w}" height="14" fill="${p.ac}"/>`;
+ if(S.bd.has("sticker"))g+=`<circle cx="${m}" cy="${y+h*.5}" r="${Math.min(w,h)*.17}" fill="#fffaf0" stroke="${p.ac}" stroke-width="2.5"/><text x="${m}" y="${y+h*.5+5}" font-size="14" text-anchor="middle" fill="#8a6a22" font-family="Noto Serif TC,serif" font-weight="900">甜</text>`;
+ if(S.bd.has("bow"))g+=`<g transform="translate(${m} ${y+h*.2})" fill="${p.ac}" stroke="rgba(0,0,0,.25)"><path d="M0 0C-24-20-30 8 0 0C24-20 30 8 0 0"/><circle r="4.5"/></g>`;
+ if(S.bd.has("tag"))g+=`<g transform="translate(${m+w*.2} ${y+4})"><path d="M0 0q8 26 2 40" stroke="#555" fill="none"/><rect x="-8" y="40" width="22" height="30" rx="3" fill="#fffaf0" stroke="#888" transform="rotate(8)"/><circle cx="2" cy="46" r="1.8" fill="#888"/></g>`;
+ return g+dim(x,y+h+30,x+w,y+h+30,b.w+" cm")+dim(x-14,y,x-14,y+h,b.h+" cm")}
+function vBnet(){const b=bagD(),T=1.5,tw=T+2*b.w+2*b.d,th=b.h+b.d+3,s=Math.min(370/tw,230/th),x=15,y=34,H=b.h*s,pn=[[T,"糊邊"],[b.w,"正面"],[b.d,"側面"],[b.w,"背面"],[b.d,"側面"]];let g="",cx=x;
+ pn.forEach(q=>{const w=q[0]*s;g+=`<rect x="${cx}" y="${y}" width="${w}" height="${H}" fill="${P().lid}" fill-opacity=".5" stroke="#333" stroke-width="1.3"/><text x="${cx+w/2}" y="${y+H/2}" font-size="9" fill="#888" text-anchor="middle">${q[1]}</text>`;cx+=w});
+ g+=`<rect x="${x+T*s}" y="${y+H}" width="${b.w*s}" height="${b.d*s}" fill="${P().tr}" fill-opacity=".5" stroke="#333" stroke-width="1.3"/><text x="${x+T*s+b.w*s/2}" y="${y+H+b.d*s/2+3}" font-size="9" fill="#888" text-anchor="middle">底板</text><path d="M${x} ${y+3*s}H${x+tw*s}" stroke="#333" stroke-dasharray="4 3"/><text x="${x+2}" y="${y+3*s-3}" font-size="8" fill="#888">上折邊 3 cm</text>`;
+ return g+dim(x,y-10,x+tw*s,y-10,f(tw)+" cm")+dim(x+tw*s+8,y,x+tw*s+8,y+H,b.h+" cm")}
+const V={d3:v3d,out:vOut,pair:vPair,lid:vLid,in:vIn,net:vNet,bag:vBag,bnet:vBnet};
+
+function spec(){const z=ZZ(),b=bagD(),n=S.ly==="free"?S.pcs.length:(LY[S.ly].k||LY[S.ly].c.length);$("#spec").innerHTML=[["盒身",`${z.L} × ${z.W} × ${z.H} cm（${SZ[S.size].n}）`],["盒蓋",`${f(z.L+.6)} × ${f(z.W+.6)} × ${f(z.H+.3)} cm`],["外盒形狀",SHN[S.shape]+"・"+SHS[S.shape]],["蓋面圖文",LB[S.lb]+"・"+S.t1],["蓋內巧思",[...S.li].map(k=>LI[k]).join("、")||"無"],["已選內容物",Array.from({length:nSlots()},(_,i)=>slotGet(i)).filter(Boolean).length+" / "+nSlots()+" 格"],["盒面圖樣",PT[S.pt]],["內襯",`${LY[S.ly].n}，共 ${n} ${S.ly==="free"?"件":"格"}・${IT[S.it]}${S.ly==="free"&&ovSet().size?"，重疊 "+ovSet().size+" 處":""}`],["提袋",`${b.w} × ${b.d} × ${b.h} cm・${BG[S.bag]}`]].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}
+
+function chips(host,title,sub,opts,key,multi,sw){const g=document.createElement("div");g.className="grp rv in";g.innerHTML=`<h3>${title}<small>${sub}</small></h3><div class="chips"></div>`;const box=g.lastChild;
+ Object.entries(opts).forEach(([k,v])=>{const bt=document.createElement("button");bt.className="chip";bt.type="button";const lab=typeof v==="string"?v:v.n;bt.innerHTML=(sw?`<span class="sw" style="background:${v.lid}"></span>`:"")+lab;
+  const on=()=>multi?S[key].has(k):S[key]===k;bt.setAttribute("aria-pressed",on());
+  bt.onclick=()=>{if(multi){S[key].has(k)?S[key].delete(k):S[key].add(k)}else S[key]=k;box.querySelectorAll(".chip").forEach((e,i)=>e.setAttribute("aria-pressed",multi?S[key].has(Object.keys(opts)[i]):S[key]===Object.keys(opts)[i]));if(key==="shape"){fixLy();buildCtl();draw()}else if((key==="dc"||key==="lb")&&!["out","d3","pair"].includes(S.view))setView("d3");else if(key==="li"&&S.view!=="lid")setView("lid");else if(key==="bd"&&S.view!=="bag")setView("bag");else if(key==="bag"&&S.view!=="bag")setView("bag");else if(key==="pt"&&!["out","bag","d3","pair"].includes(S.view))setView("d3");else if(["ly","it"].includes(key)&&S.view!=="in")setView("in");else draw()};
+  box.appendChild(bt)});host.appendChild(g)}
+function setView(v){S.view=v;document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v));draw()}
+const ctl=$("#ctl");function buildCtl(){ctl.innerHTML="";
+chips(ctl,"外盒形狀","圓形、橢圓天地蓋與造型水果禮盒",SHN,"shape");
+chips(ctl,"盒型尺寸","外盒大小，影響提袋","sizeO".length?Object.fromEntries(Object.entries(SZ).map(([k,v])=>[k,`${v.n}・${v.L}×${v.W}`])):{}, "size");
+chips(ctl,"內襯格局","分格方式",lyOpts(), "ly");
+chips(ctl,"點心造型","預覽中的點心外型",IT,"it");tasteGrp();pickGrp();
+chips(ctl,"配色","盒與袋共用",PL,"col",false,true);
+chips(ctl,"盒面圖樣","日韓案例的向量詮釋",PT,"pt");
+chips(ctl,"蓋面圖文","取代腰封的蓋面標籤",LB,"lb");textGrp();
+chips(ctl,"外盒裝飾","可複選",DC,"dc",true);
+chips(ctl,"蓋內巧思","天地蓋內裡設計，可複選",LI,"li",true);
+chips(ctl,"提袋款式","提把與形式",BG,"bag");
+chips(ctl,"提袋裝飾","可複選",BD,"bd",true);}buildCtl();
+const tabs=$("#tabs");Object.entries(VW).forEach(([k,v])=>{const b=document.createElement("button");b.textContent=v;b.dataset.v=k;b.setAttribute("aria-pressed",k===S.view);b.onclick=()=>setView(k);tabs.appendChild(b)});
+$("#tb").innerHTML=Object.values(SZ).map(z=>`<tr><td>${z.n}</td><td>${z.L} × ${z.W} × ${z.H}</td><td>${z.n.replace(/[^0-9–]/g,"")} 入</td><td>${z.L+4} × ${f(z.H+3.5)} × ${z.W+6}</td></tr>`).join("");
+draw();
+
+/* 動態：捲動進度、視差、背景色相、顯現 */
+const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add("in")),{threshold:.12});
+document.querySelectorAll(".rv").forEach(e=>io.observe(e));
+const io2=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&document.documentElement.style.setProperty("--h",e.target.dataset.h)),{rootMargin:"-45% 0px -45% 0px"});
+document.querySelectorAll("[data-h]").forEach(e=>io2.observe(e));
+let tk=false;addEventListener("scroll",()=>{if(tk)return;tk=true;requestAnimationFrame(()=>{const m=document.documentElement.scrollHeight-innerHeight,y=scrollY;$("#bar").style.transform=`scaleX(${m>0?y/m:0})`;$("#b1").style.transform=`translateY(${y*.15}px)`;$("#b2").style.transform=`translateY(${-y*.1}px)`;document.querySelectorAll(".fl").forEach((e,i)=>e.style.translate=`0 ${-y*(.05+i*.03)}px`);tk=false})},{passive:true});
+$("#th").onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=d?"light":"dark"};
+
+/* 日韓觀察：持續收集的案例庫 */
+const JK=[
+{c:"日本",pt:"sakura",q:"お花のおはぎ ネオ和菓子 ギフト",t:"進化系和菓子",d:"2026 母親節禮",n:"仿真花造型的おはぎ等「ネオ和菓子」成為話題，重點是掀開盒蓋那一刻的視覺驚喜，社群擴散力強。",k:"開窗蓋＋單層大格，把點心當花一樣擺盤",u:"https://netshop.impress.co.jp/r/prtimes/items/000000847.000015685",s:"PR TIMES",p:{size:"M",ly:"hero",it:"square",col:"matcha",dc:["window","twine"]}},
+{c:"日本",pt:"roundel",q:"とらや 干支 午 羊羹 パッケージ",t:"干支（午年）限定盒",d:"2026 年賀",n:"老字號與洋菓子店都推出馬年圖樣的圓盒與個別包裝，小份量、多口味，並強調新年的吉祥感。",k:"季節限定圖樣＋個別包裝，盒面保持留白",u:"https://kurashi.biglobe.ne.jp/event_newyear/keyword_confectionery/",s:"Biglobe 暮らし",p:{size:"S",ly:"g6",it:"square",col:"berry",dc:["label","wax"]}},
+{c:"日本",pt:"none",q:"洋菓子 ギフト 焼き菓子 パッケージ おしゃれ",t:"消えもの的送禮心理",d:"2026 調查",n:"調查顯示送禮偏好「吃完就沒有」的甜點，不造成保管負擔；同時偏愛自己不會買、略帶犒賞感的設計款。",k:"小而輕、易拆易回收，用單點燙金撐起質感",u:"https://netshop.impress.co.jp/r/prtimes/items/000000287.000098805",s:"PR TIMES",p:{size:"S",ly:"g6",it:"mac",col:"cream",dc:["label"]}},
+{c:"日本",pt:"wave",q:"青海波 和菓子 パッケージ",t:"傳統紋樣＋環保材質",d:"市場報告",n:"日本糖果與點心包裝市場把傳統和紋與環保素材視為主要成長動力，文化辨識度與永續同時被要求。",k:"和紋做滿版印刷，搭配單一紙材減少複合材",u:"https://www.imarcgroup.com/report/ja/japan-confectionery-packaging-market",s:"IMARC Group",p:{size:"M",ly:"g9",it:"long",col:"navy",dc:["label"]}},
+{c:"韓國",pt:"stripe",q:"색동 보자기 설 선물세트 패키지",t:"K-헤리티지：色動與包袱巾",d:"2026 設日",n:"傳統文化熱帶動節慶包裝，常見色動（多彩條紋）配色，以及模仿보자기（包袱巾）的包裝概念。",k:"用緞帶結模擬包袱巾，色塊條紋做盒面",u:"https://www.insight.co.kr/news/542986",s:"Insight",p:{size:"XL",ly:"g6",it:"cookie",col:"berry",dc:["ribbon","twine"]}},
+{c:"韓國",pt:"minhwa",q:"뚜레쥬르 설 선물세트 민화 패키지",t:"民畫重新詮釋",d:"Tous Les Jours 案例（2022 虎年）",n:"把十長生圖、牡丹圖印在餅乾與傳餅禮盒上，每個圖案有祈福寓意，價格仍落在平價帶。",k:"插畫滿版盒面，內部維持簡單分格以控成本",u:"https://cjnews.cj.net/%EB%9A%9C%EB%A0%88%EC%A5%AC%EB%A5%B4-%EC%A0%84%ED%86%B5%EC%9D%98-%EB%A7%9B%EA%B3%BC-%EB%A9%8B-%EB%8B%B4%EC%9D%80-%EC%84%A4-%EC%84%A0%EB%AC%BC%EB%A1%9C-%EB%A7%88%EC%9D%8C%EC%9D%84-%EC%A0%84",s:"CJ News",p:{size:"XL",ly:"g6",it:"cookie",col:"navy",dc:["label","ribbon"]}},
+{c:"韓國",pt:"dots",q:"우나스 김환기 쿠키 선물세트",t:"藝術家聯名餅乾禮盒",d:"Unas × 金煥基",n:"把畫家作品的美學帶進餅乾與盒面，節慶禮盒走向收藏與展示。",k:"小尺寸、開窗，盒面像一張小畫作",u:"https://www.marieclairekorea.com/?p=507907",s:"Marie Claire Korea",p:{size:"S",ly:"g6",it:"cookie",col:"cream",dc:["window","label"]}},
+{c:"韓國",pt:"none",q:"약과 선물세트 패키지 디자인",t:"新傳統點心潮",d:"2026 趨勢",n:"約菓、麻糬、羊羹回溫，加上奶油麻糬與杜拜風口感餅乾，賣點在切面與內餡的口感層次。",k:"長條盒分格，開窗露出切面與內餡",u:"https://www.haniseoul.com/ko/travels/korea/korean-trend-food-guide",s:"HaniSeoul",p:{size:"B",ly:"row",it:"square",col:"cara",dc:["window"]}}
+];
+function thumb(x){const sv={...S};let s;try{Object.assign(S,x.p,{pt:x.pt,shape:"rect",lb:"none",dc:new Set(x.p.dc)});s=vOut()}finally{Object.assign(S,sv)}s=s.replace(/<g stroke="#e0533d"[^>]*><path[^>]*\/><\/g><text[^>]*>[^<]*<\/text>/g,"");return`<svg class="th" viewBox="0 0 400 300" aria-hidden="true">${s}</svg>`}
+let jf="全部";
+function jkRender(){
+ $("#cnt").textContent=JK.length;
+ const fl=$("#flt");fl.innerHTML="";
+ ["全部","日本","韓國"].forEach(k=>{const b=document.createElement("button");b.className="chip";b.type="button";b.textContent=k;b.setAttribute("aria-pressed",k===jf);b.onclick=()=>{jf=k;jkRender()};fl.appendChild(b)});
+ const g=$("#jkgrid");g.innerHTML="";
+ JK.filter(x=>jf==="全部"||x.c===jf).forEach(x=>{
+  const a=document.createElement("article");a.className="col rv in";
+  a.innerHTML=thumb(x)+`<small>${x.c}・${x.d}</small><h3>${x.t}</h3><p>${x.n}</p><p class="tk"><b>包裝啟示</b>　${x.k}</p><a href="${x.u}" target="_blank" rel="noopener">來源：${x.s}</a><a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(x.q||x.t+" 包裝設計")}" target="_blank" rel="noopener">看實際設計圖片</a>`;
+  const b=document.createElement("button");b.className="chip";b.type="button";b.textContent="套用到模擬器";
+  b.onclick=()=>{Object.assign(S,x.p,{pt:x.pt||"none",shape:"rect",lb:"none",dc:new Set(x.p.dc)});buildCtl();setView("d3");$("#lab").scrollIntoView({behavior:"smooth"})};
+  a.appendChild(b);g.appendChild(a)});
+}
+jkRender();
+/* 自由擺放、3D 旋轉互動 */
+const cv=$("#cv");
+function pt2(e){const p=cv.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(cv.getScreenCTM().inverse())}
+function inTray(p){return p.x>=G.x-8&&p.x<=G.x+G.w+8&&p.y>=G.y-8&&p.y<=G.y+G.h+8}
+function clampPc(q){q.u=Math.max(.04,Math.min(.96,q.u));q.v=Math.max(.04,Math.min(.96,q.v));if(S.shape==="round"||S.shape==="oval"||S.shape==="fruit"){const a=(q.u-.5)/.5,b=(q.v-.5)/.5,d=Math.hypot(a,b);if(d>.9){q.u=.5+a/d*.45;q.v=.5+b/d*.45}}}
+function sync3(){$("#yaw").value=Math.round(S.yaw);$("#tilt").value=Math.round(S.tilt)}
+cv.addEventListener("pointerdown",e=>{
+ if(S.view==="d3"){D3={x:e.clientX,y:e.clientY,yaw:S.yaw,tilt:S.tilt};S.auto=false;$("#aut").setAttribute("aria-pressed","false");cv.setPointerCapture(e.pointerId);return}
+ if(S.view==="in"&&S.ly!=="free"){const g=e.target.closest(".sl");if(g){S.slot=+g.dataset.slot;rdraw()}return}
+ if(S.view!=="in"||S.ly!=="free")return;
+ const g=e.target.closest(".pc");if(!g){S.sel=-1;rdraw();return}
+ S.sel=+g.dataset.i;S.slot=S.sel;DR={i:S.sel,out:false};cv.setPointerCapture(e.pointerId);rdraw()});
+cv.addEventListener("pointermove",e=>{
+ if(D3){S.yaw=((D3.yaw+(e.clientX-D3.x)*.6)%360+360)%360;S.tilt=Math.max(12,Math.min(88,D3.tilt+(e.clientY-D3.y)*.3));sync3();rdraw();return}
+ if(!DR)return;const p=pt2(e),q=S.pcs[DR.i];DR.out=!inTray(p);q.u=(p.x-G.x)/G.w;q.v=(p.y-G.y)/G.h;if(!DR.out)clampPc(q);rdraw()});
+const up=()=>{if(D3){D3=null;return}if(!DR)return;if(DR.out){S.pcs.splice(DR.i,1);S.sel=-1;S.slot=0}DR=null;rdraw()};
+cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
+
+$("#pis").innerHTML=Object.entries(PD).map(([k,d])=>`<div class="pi" data-t="${k}" role="button" tabindex="0" aria-label="加入${d[2]}"><svg viewBox="0 0 60 36">${item(k==="big"?"cookie":k,6,0,48,36,{})}</svg><small>${d[2]}</small></div>`).join("");
+$("#pis").addEventListener("pointerdown",e=>{
+ const b=e.target.closest(".pi");if(!b)return;e.preventDefault();const t=b.dataset.t;if(S.view!=="in")setView("in");
+ const gh=document.createElement("div");gh.className="ghost";gh.innerHTML=`<svg viewBox="0 0 60 36" width="72" height="44">${b.querySelector("svg").innerHTML}</svg>`;document.body.appendChild(gh);
+ const mv=ev=>{gh.style.left=ev.clientX+"px";gh.style.top=ev.clientY+"px"};mv(e);const sx=e.clientX,sy=e.clientY;
+ const end=ev=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",end);removeEventListener("pointercancel",end);gh.remove();
+  let u=.5+(Math.random()-.5)*.3,v=.5+(Math.random()-.5)*.3;
+  if(Math.hypot(ev.clientX-sx,ev.clientY-sy)>8){const p=pt2(ev);if(!inTray(p))return;u=(p.x-G.x)/G.w;v=(p.y-G.y)/G.h}
+  const q={t,u,v,r:0};clampPc(q);S.pcs.push(q);S.sel=S.pcs.length-1;rdraw()};
+ addEventListener("pointermove",mv);addEventListener("pointerup",end);addEventListener("pointercancel",end)});
+$("#prot").onclick=()=>{const q=S.pcs[S.sel];if(q){q.r=(q.r+30)%360;rdraw()}};
+$("#pdel").onclick=()=>{if(S.sel>=0){S.pcs.splice(S.sel,1);S.sel=-1;rdraw()}};
+$("#pclr").onclick=()=>{S.pcs=[];S.cleared=true;S.sel=-1;rdraw()};
+$("#pfill").onclick=()=>{prefill();S.cleared=false;S.sel=-1;rdraw()};
+addEventListener("keydown",e=>{if((e.key==="Delete"||e.key==="Backspace")&&S.view==="in"&&S.ly==="free"&&S.sel>=0&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){S.pcs.splice(S.sel,1);S.sel=-1;rdraw()}});
+
+$("#yaw").oninput=e=>{S.yaw=+e.target.value;S.auto=false;$("#aut").setAttribute("aria-pressed","false");rdraw()};
+$("#tilt").oninput=e=>{S.tilt=+e.target.value;rdraw()};
+$("#opn").onclick=e=>{S.open=!S.open;e.currentTarget.setAttribute("aria-pressed",S.open);rdraw()};
+function spin(){if(S.auto&&S.view==="d3"){S.yaw=(S.yaw+.6)%360;sync3();rdraw();requestAnimationFrame(spin)}}
+$("#aut").onclick=e=>{S.auto=!S.auto;e.currentTarget.setAttribute("aria-pressed",S.auto);if(S.auto)requestAnimationFrame(spin)};
+</script>
+</body>
+</html>
